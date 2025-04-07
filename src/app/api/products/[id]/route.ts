@@ -32,18 +32,24 @@ export async function GET(
       });
     }
 
+    const productId = parseInt(params.id);
+    if (isNaN(productId)) {
+      return new NextResponse(
+        JSON.stringify({ message: "Invalid product ID" }),
+        { status: 400 }
+      );
+    }
+
     const product = await prisma.product.findUnique({
       where: {
-        product_id: parseInt(params.id),
+        product_id: productId,
       },
     });
 
     if (!product) {
       return new NextResponse(
         JSON.stringify({ message: "Product not found" }),
-        {
-          status: 404,
-        }
+        { status: 404 }
       );
     }
 

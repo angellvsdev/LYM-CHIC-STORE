@@ -32,18 +32,24 @@ export async function GET(
       });
     }
 
+    const categoryId = parseInt(params.id);
+    if (isNaN(categoryId)) {
+      return new NextResponse(
+        JSON.stringify({ message: "Invalid category ID" }),
+        { status: 400 }
+      );
+    }
+
     const category = await prisma.category.findUnique({
       where: {
-        category_id: parseInt(params.id),
+        category_id: categoryId,
       },
     });
 
     if (!category) {
       return new NextResponse(
         JSON.stringify({ message: "Category not found" }),
-        {
-          status: 404,
-        }
+        { status: 404 }
       );
     }
 

@@ -24,11 +24,11 @@ export async function GET(req: NextRequest) {
       sessionOptions
     );
 
-    // if (!session.user) {
-    //   return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
-    //     status: 401,
-    //   });
-    // }
+    if (!session.user) {
+      return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
 
     const searchParams = req.nextUrl.searchParams;
     const page = parseInt(searchParams.get("page") || "1");

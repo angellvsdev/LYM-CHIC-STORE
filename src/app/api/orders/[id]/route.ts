@@ -114,3 +114,71 @@ export async function DELETE(
     );
   }
 }
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const response = NextResponse.next();
+    const session = await getIronSession<Session>(
+      req,
+      response,
+      sessionOptions
+    );
+
+    if (!session.user) {
+      return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+
+    const orderId = parseInt(params.id);
+    if (isNaN(orderId)) {
+      return new NextResponse(JSON.stringify({ message: "Invalid order ID" }), {
+        status: 400,
+      });
+    }
+
+    // Construir el where clause
+    const whereClause: {
+      order_id: number;
+      user_id?: number;
+    } = {
+      order_id: orderId,
+    };
+
+    // Si no es admin, solo puede ver sus propias órdenes
+    if (session.user.role !== "admin") {
+      whereClause.user_id = session.user.user_id;
+    }
+
+    const order = await prisma.order.findFirst({
+      where: whereClause,
+      include: {
+        orderStatus: true,
+        order_details: true,
+        user: {
+          select: {
+            user_id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      return new NextResponse(JSON.stringify({ message: "Order not found" }), {
+        status: 404,
+      });
+    }
+
+    return NextResponse.json(order);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}

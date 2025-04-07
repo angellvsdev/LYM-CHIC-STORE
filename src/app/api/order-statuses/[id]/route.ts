@@ -26,15 +26,23 @@ export async function GET(
       sessionOptions
     );
 
-    if (!session.user || session.user.role !== "admin") {
-      return new NextResponse(JSON.stringify({ message: "Forbidden" }), {
-        status: 403,
+    if (!session.user) {
+      return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
       });
+    }
+
+    const orderStatusId = parseInt(params.id);
+    if (isNaN(orderStatusId)) {
+      return new NextResponse(
+        JSON.stringify({ message: "Invalid order status ID" }),
+        { status: 400 }
+      );
     }
 
     const orderStatus = await prisma.orderStatus.findUnique({
       where: {
-        order_status_id: parseInt(params.id),
+        order_status_id: orderStatusId,
       },
     });
 

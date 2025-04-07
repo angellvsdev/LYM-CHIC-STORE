@@ -4,6 +4,7 @@ import { sessionOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
 import { CreateProductSchema } from "@/lib/utils/validation/schemas";
 import { User } from "@/types";
+import { z } from "zod";
 
 declare module "iron-session" {
   interface IronSessionData {
@@ -23,9 +24,14 @@ export async function POST(req: NextRequest) {
       response,
       sessionOptions
     );
-    console.log(session);
 
-    if (!session.user || session.user.role !== "admin") {
+    if (!session.user) {
+      return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+
+    if (session.user.role !== "admin") {
       return new NextResponse(JSON.stringify({ message: "Forbidden" }), {
         status: 403,
       });
@@ -41,6 +47,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
     console.error("Error creating product:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Validation Error", errors: error.errors },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }
