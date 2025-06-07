@@ -5,22 +5,141 @@
   --foreground: #171717;
 }
 
+
+@theme { /* Setting up the colours palette for the project (5 colors, 9 variants + its default color): For visual reference visit: https://coolors.co/palette/595758-ffeef2-ffe4f3-ffc8fb-ff92c2 */
+  --color-davys-gray: #595758;
+  --color-davys-gray-100: #121212;
+  --color-davys-gray-200: #242324;
+  --color-davys-gray-300: #363536;
+  --color-davys-gray-400: #484747;
+  --color-davys-gray-500: #595758;
+  --color-davys-gray-600: #7c797a;
+  --color-davys-gray-700: #9d9b9c;
+  --color-davys-gray-800: #bdbcbd;
+  --color-davys-gray-900: #dedede;
+
+  --color-lavender-blush: #ffeef2;
+  --color-lavender-blush-100: #630017;
+  --color-lavender-blush-200: #c6002e;
+  --color-lavender-blush-300: #ff2a5c;
+  --color-lavender-blush-400: #ff8da7;
+  --color-lavender-blush-500: #ffeef2;
+  --color-lavender-blush-600: #fff3f6;
+  --color-lavender-blush-700: #fff6f8;
+  --color-lavender-blush-800: #fff9fa;
+  --color-lavender-blush-900: #fffcfd;
+
+  --color-pale-purple: #ffe4f3;
+  --color-pale-purple-100: #610035;
+  --color-pale-purple-200: #c2006b;
+  --color-pale-purple-300: #ff249c;
+  --color-pale-purple-400: #ff85c8;
+  --color-pale-purple-500: #ffe4f3;
+  --color-pale-purple-600: #ffebf6;
+  --color-pale-purple-700: #fff0f8;
+  --color-pale-purple-800: #fff5fa;
+  --color-pale-purple-900: #fffafd;
+
+  --color-pink-lavender: #ffc8fb;
+  --color-pink-lavender-100: #5b0055;
+  --color-pink-lavender-200: #b600a9;
+  --color-pink-lavender-300: #ff11ef;
+  --color-pink-lavender-400: #ff6cf5;
+  --color-pink-lavender-500: #ffc8fb;
+  --color-pink-lavender-600: #ffd2fc;
+  --color-pink-lavender-700: #ffddfd;
+  --color-pink-lavender-800: #ffe9fe;
+  --color-pink-lavender-900: #fff4fe;
+
+  --color-amaranth-pink: #ff92c2;
+  --color-amaranth-pink-100: #510023;
+  --color-amaranth-pink-200: #a10046;
+  --color-amaranth-pink-300: #f20069;
+  --color-amaranth-pink-400: #ff4395;
+  --color-amaranth-pink-500: #ff92c2;
+  --color-amaranth-pink-600: #ffa9ce;
+  --color-amaranth-pink-700: #ffbfdb;
+  --color-amaranth-pink-800: #ffd4e7;
+  --color-amaranth-pink-900: #ffeaf3;
+
+}
+
+/* Sistema de Diseño */
+@theme {
+  /* Espaciados - Sistema de 4px */
+  --spacing-xxs: 0.25rem;
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgba(89, 87, 88, 0.05);
+  --shadow-md: 0 4px 6px rgba(89, 87, 88, 0.1);
+  --shadow-lg: 0 10px 15px rgba(89, 87, 88, 0.1);
+  --shadow-xl: 0 20px 25px rgba(89, 87, 88, 0.15);
+  
+  /* Bordes */
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 1rem;
+  --border-radius-full: 9999px;
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 4px;
+
+  /* Botones */
+  --button-height-sm: 2rem;
+  --button-height-md: 2.5rem;
+  --button-height-lg: 3rem;
+  --button-padding-x: var(--spacing-md);
+  --button-padding-y: var(--spacing-xs);
+  --button-font-weight: 600;
+  --button-transition: all 0.2s ease-in-out;
+
+  /* Inputs */
+  --input-height: var(--button-height-md);
+  --input-padding: var(--spacing-xs) var(--spacing-sm);
+  --input-border-color: var(--color-davys-gray-300);
+  --input-border-radius: var(--border-radius-md);
+  --input-focus-ring: 0 0 0 2px var(--color-amaranth-pink-200);
+  
+  /* Tarjetas */
+  --card-padding: var(--spacing-lg);
+  --card-border-radius: var(--border-radius-lg);
+  --card-shadow: var(--shadow-lg);
+  --card-hover-transform: translateY(-4px);
+  
+  /* Alertas y Notificaciones */
+  --alert-padding: var(--spacing-md) var(--spacing-lg);
+  --alert-border-radius: var(--border-radius-md);
+  --alert-success-bg: var(--color-pale-purple-100);
+  --alert-error-bg: var(--color-amaranth-pink-200);
+  --alert-warning-bg: var(--color-lavender-blush-200);
+  --alert-info-bg: var(--color-davys-gray-200);
+
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-grotesk: var(--font-host-grotesk); /* Setting up the font for the project */
 }
 
+
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+background: var(--background);
+color: var(--foreground);
+font-family: var(--font-grotesk), Arial, sans-serif;
+} 
