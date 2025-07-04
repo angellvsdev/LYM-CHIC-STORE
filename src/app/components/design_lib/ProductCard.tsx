@@ -1,6 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { Product } from '@/app/api/products/product';
+import 'animate.css';
+
 
 interface ProductCardProps {
     product: Product;
@@ -8,7 +10,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return (
-        <div className="flex flex-col bg-white rounded-lg shadow-md w-full max-w-[320px] h-[450px] border border-gray-200">
+        <div className="flex flex-col bg-davys-gray-100 rounded-lg shadow-lg w-full max-w-[320px] h-[450px] border shadow-amaranth-pink-500 animate__animated animate__flipInY animate__faster">
             <div className="relative w-full h-[200px]">
                 <Image
                     src={product.image}
@@ -18,24 +20,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     className="object-cover rounded-t-lg"
                     priority
                 />
-                <button className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors">
+                <button className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors hover:cursor-pointer">
                     
                 </button>
             </div>
             <div className="flex flex-col flex-grow p-4 space-y-3">
-                <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">{product.name}</h3>
+                <h3 className="text-lg font-semibold text-white line-clamp-2">{product.name}</h3>
                 <div className="flex flex-wrap gap-2">
                     {product.size && (
-                        <span className="px-2 py-1 text-sm rounded bg-gray-100 text-gray-700">{product.size}</span>
+                        <span className="px-2 py-1 text-sm rounded bg-lavender-blush-400 text-white">{product.size}</span>
                     )}
                     {product.color && (
-                        <span className="px-2 py-1 text-sm rounded bg-gray-100 text-gray-700">{product.color}</span>
+                        <span className="px-2 py-1 text-sm rounded bg-lavender-blush-300 text-white">{product.color}</span>
                     )}
                 </div>
-                <p className="text-sm text-gray-600 line-clamp-2 flex-grow">{product.description}</p>
+                <p className="text-sm text-white line-clamp-2 flex-grow">{product.description}</p>
                 <div className="flex justify-between items-center pt-2">
-                    <span className="text-xl font-bold text-gray-900">${product.price}</span>
-                    <button className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
+                    <span className="text-xl font-extrabold text-davys-gray-800">${product.price}</span>
+                    <button className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors hover:cursor-pointer">
                         Agregar al Carrito
                     </button>
                 </div>
