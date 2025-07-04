@@ -4,20 +4,32 @@ import InformationCircleIcon from "@heroicons/react/24/outline/InformationCircle
 import PhoneIcon from "@heroicons/react/24/outline/PhoneIcon";
 import ChevronDownIcon from '@heroicons/react/24/outline/ChevronDownIcon';
 import ShoppingBagIcon from "@heroicons/react/24/outline/ShoppingBagIcon";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSwipeable } from "react-swipeable";
-import { useState } from "react";
 
 
 const UseNavBar = () => {
     const [isVisible, setIsVisible] = useState(false);
     
+    // Bloquear scroll del body cuando el menú está visible en móviles
+    useEffect(() => {
+        const isMobile = window.innerWidth < 768;
+        if (isVisible && isMobile) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        // Limpiar al desmontar
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isVisible]);
+
     const useSwipeableNav = () => {
         const handlers = useSwipeable({
             onSwipedDown: () => {
                 // Handle swipe down event
                 setIsVisible(true)
-                
             },
             onSwipedUp: () => {
                 // Handle swipe up event
@@ -32,24 +44,28 @@ const UseNavBar = () => {
 
     return(
         <>
-            <nav className="flex flex-col py-5 bg-linear-60 from-amaranth-pink-200 to-amaranth-pink-300">
-                <div className="block text-[#510023] text-center text-[10px] md:hidden my-3 z-60" {...useSwipeableNav()}>
-                    Desliza hacia abajo para desplegar el menú. <ChevronDownIcon className="w-full h-[20px] text-center" />
+            <nav className="flex flex-col py-5 bg-linear-60 from-amaranth-pink-200 to-amaranth-pink-300 font-grotesk">
+                <div className="block text-[#510023] text-center text-[14px] md:hidden my-3 z-60" {...useSwipeableNav()}>
+                    {
+                        isVisible 
+                            ? <p>Desliza hacia arriba para ocultar el menú. <ChevronDownIcon className="w-full h-[20px] text-center" /></p>
+                            : <p>Desliza hacia abajo para desplegar el menú. <ChevronDownIcon className="w-full h-[20px] text-center" /></p>
+                    }
                 </div>
                 <div className={`w-screen ${ isVisible ? 'flex h-screen absolute top-0 z-50' : null}`}>
-                    {isVisible ? <div className={`flex flex-col items-center justify-end w-full h-screen bg-gradient-to-b from-amaranth-pink-200 to-amaranth-pink-300 px-2`}>
-                        <a href="#" className="text-[#510023] text-[10px] bg-white px-3 py-1.5 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><GiftIcon className="h-6 text-center inline-block" /> Tienda</a>
-                        <a href="#" className="text-[#510023] text-[10px] bg-white px-3 py-1.5 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><InformationCircleIcon className="h-6 text-center inline-block" /> Nosotros</a>
-                        <a href="#" className="text-[#510023] text-[10px] bg-white px-3 py-1.5 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><ShoppingBagIcon className="h-6 text-center inline-block" /> Marketplace</a>
-                        <a href="#" className="text-[#510023] text-[10px] bg-white px-3 py-1.5 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><PhoneIcon className="h-6 text-center inline-block" /> Contacto</a>
+                    {isVisible ? <div className={`flex flex-col items-center justify-end w-full h-screen bg-gradient-to-b from-amaranth-pink-200 to-amaranth-pink-300 px-2 animate__animated animate__slideInDown animate__faster`}>
+                        <a href="#" className="text-[#510023] text-[16px] bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><GiftIcon className="h-6 text-center inline-block" /> Tienda</a>
+                        <a href="#" className="text-[#510023] text-[16px] bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><InformationCircleIcon className="h-6 text-center inline-block" /> Nosotros</a>
+                        <a href="#" className="text-[#510023] text-[16px] bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><ShoppingBagIcon className="h-6 text-center inline-block" /> Marketplace</a>
+                        <a href="#" className="text-[#510023] text-[16px] bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><PhoneIcon className="h-6 text-center inline-block" /> Contacto</a>
                     </div> : null}
                 </div>
                 <div className="hidden md:flex items-center justify-center w-full px-4">
                     <div className="flex space-x-8">
-                        <a href="#" className="text-[#510023] text-[10px] bg-white px-3 py-1.5 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><GiftIcon className="h-6 text-center inline-block" /> Tienda</a>
-                        <a href="#" className="text-[#510023] text-[10px] bg-white px-3 py-1.5 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><InformationCircleIcon className="h-6 text-center inline-block" /> Nosotros</a>
-                        <a href="#" className="text-[#510023] text-[10px] bg-white px-3 py-1.5 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><ShoppingBagIcon className="h-6 text-center inline-block" /> Marketplace</a>
-                        <a href="#" className="text-[#510023] text-[10px] bg-white px-3 py-1.5 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><PhoneIcon className="h-6 text-center inline-block" /> Contacto</a>
+                        <a href="#" className="text-[#510023] text-[14px] bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><GiftIcon className="h-6 text-center inline-block" /> Tienda</a>
+                        <a href="#" className="text-[#510023] text-[14px] bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><InformationCircleIcon className="h-6 text-center inline-block" /> Nosotros</a>
+                        <a href="#" className="text-[#510023] text-[14px] bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><ShoppingBagIcon className="h-6 text-center inline-block" /> Marketplace</a>
+                        <a href="#" className="text-[#510023] text-[14px] bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><PhoneIcon className="h-6 text-center inline-block" /> Contacto</a>
                     </div>
                 </div>
             </nav>
