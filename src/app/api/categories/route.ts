@@ -24,13 +24,6 @@ export async function GET(req: NextRequest) {
       response,
       sessionOptions
     );
-
-    if (!session.user) {
-      return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
-        status: 401,
-      });
-    }
-
     const querySchema = z.object({
       page: z.string().regex(/^\d+$/).optional(),
       limit: z.string().regex(/^\d+$/).optional(),
