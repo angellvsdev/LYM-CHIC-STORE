@@ -2,7 +2,68 @@ openapi: 3.0.3
 info:
   title: Lymchic Store API
   version: 1.0.0
-  description: API RESTful para la tienda Lymchic Store
+  description: |
+    API RESTful para la tienda Lymchic Store.
+    
+    ## Estructuras de datos principales
+    
+    ### User
+    ```json
+    {
+      "user_id": 1,
+      "name": "Juan Perez",
+      "email_address": "juan@correo.com",
+      "phone_number": "123456789",
+      "registration_date": "2025-07-05T12:00:00.000Z",
+      "role": "user"
+    }
+    ```
+    
+    ### Category
+    ```json
+    {
+      "id": "a1b2c3d4-5678-1234-9abc-1234567890ab",
+      "name": "Ropa",
+      "description": "Ropa de moda",
+      "image": "https://img.com/catropa.png",
+      "featured": true
+    }
+    ```
+    
+    ### Product
+    ```json
+    {
+      "id": "b1e2c3d4-5678-1234-9abc-1234567890ab",
+      "name": "Camiseta",
+      "price": 25.5,
+      "description": "Camiseta de algodón",
+      "image": "https://img.com/camisa.png",
+      "size": "M",
+      "color": "rojo",
+      "featured": true,
+      "categoryId": "a1b2c3d4-5678-1234-9abc-1234567890ab"
+    }
+    ```
+    
+    ### Order
+    ```json
+    {
+      "order_id": 1,
+      "order_number": "ORD-123456",
+      "user_id": 1,
+      "order_date": "2025-07-05T12:00:00.000Z",
+      "order_status_id": 1,
+      "delivery_method": "STANDARD"
+    }
+    ```
+    
+    ### OrderStatus
+    ```json
+    {
+      "order_status_id": 1,
+      "status_name": "PENDING"
+    }
+    ```
 servers:
   - url: http://localhost:3000/api
 paths:
