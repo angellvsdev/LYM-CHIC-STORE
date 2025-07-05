@@ -58,9 +58,9 @@ export const ProductSchema = z.object({
   price: z.number().positive(),
   description: z.string(),
   image: z.string(),
-  size: z.string().optional(),
-  color: z.string().optional(),
-  featured: z.boolean().optional(),
+  size: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  featured: z.boolean().nullable().optional(),
   categoryId: z.string().uuid(),
 });
 
@@ -71,9 +71,9 @@ export const CreateProductSchema = ProductSchema.omit({
   price: z.number().positive(),
   description: z.string(),
   image: z.string(),
-  size: z.string().optional(),
-  color: z.string().optional(),
-  featured: z.boolean().optional(),
+  size: z.string().nullable().optional(),
+  color: z.string().nullable().optional(),
+  featured: z.boolean().nullable().optional(),
   categoryId: z.string().uuid(),
 });
 
@@ -143,3 +143,29 @@ export const OrderStatusHistorySchema = z.object({
   change_date: z.date(),
   notes: z.string().optional(),
 });
+
+// Types
+export type User = z.infer<typeof UserSchema>;
+export type CreateUser = z.infer<typeof CreateUserSchema>;
+export type UpdateUser = z.infer<typeof UpdateUserSchema>;
+export type LoginUser = z.infer<typeof LoginUserSchema>;
+
+export type Category = z.infer<typeof CategorySchema>;
+export type CreateCategory = z.infer<typeof CreateCategorySchema>;
+export type UpdateCategory = z.infer<typeof UpdateCategorySchema>;
+
+export type Product = z.infer<typeof ProductSchema>;
+export type CreateProduct = z.infer<typeof CreateProductSchema>;
+export type UpdateProduct = z.infer<typeof UpdateProductSchema>;
+
+export type Order = z.infer<typeof OrderSchema>;
+export type CreateOrder = z.infer<typeof CreateOrderSchema>;
+export type UpdateOrder = z.infer<typeof UpdateOrderSchema>;
+
+export type OrderDetail = z.infer<typeof OrderDetailSchema>;
+
+export type OrderStatus = z.infer<typeof OrderStatusSchema>;
+export type CreateOrderStatus = z.infer<typeof CreateOrderStatusSchema>;
+export type UpdateOrderStatus = z.infer<typeof UpdateOrderStatusSchema>;
+
+export type OrderStatusHistory = z.infer<typeof OrderStatusHistorySchema>;

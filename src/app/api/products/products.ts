@@ -1,6 +1,7 @@
-import { Product, ProductCategory } from './product';
+import { Category } from '@/lib/utils/validation/schemas';
+import { Product,  } from './product';
 
-export const categories: ProductCategory[] = [
+export const categoriesMock: Category[] = [
     {
         id: '1',
         name: 'Calzado Deportivo',

@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { Product } from '@/app/api/products/product';
+import { Product } from '@/lib/utils/validation/schemas';
 import 'animate.css';
 
 

@@ -1,25 +1,61 @@
 'use client'
 import React, { useState, useEffect } from "react";
-import { categories, featuredProducts } from "@/app/api/products/products";
 import ProductCard from "./../../design_lib/ProductCard";
 import Image from "next/image";
-
+import { Category, Product } from "@/lib/utils/validation/schemas";
+import axios from "axios";
 const FeaturedProducts = () => {
-    const [selectedCategory, setSelectedCategory] = useState<string>(categories[0].id);
+    const [categories, setCategories] = useState<Category[]>([]); // Estado para las categorías
+    const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined); // Inicialmente no hay categoría seleccionada
     const [currentSlide, setCurrentSlide] = useState(0);
-
-    const filteredProducts = featuredProducts.filter(
-        (product) => product.category === selectedCategory
-    );
-
+    const [products, setProducts] = useState<Product[]>([]); // Estado para los producto
+    async function fetchCategories() {
+        try {
+        const response = await axios.get('/api/categories');
+        console.log(response.data.data);
+        setCategories(response.data.data);
+        }
+        catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    }
+    async function fetchProducts() {
+        try {
+            const response = await axios.get('/api/products', { params: {
+                category_id: selectedCategory,
+                page: 1,
+                limit: 10,
+                sort: 'name',
+                order: 'asc'
+            }});
+            setProducts(response.data.data);
+        } catch (error) {
+            console.error("Error fetching products:", error);
+        }
+    }
     useEffect(() => {
         const timer = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % Math.ceil(filteredProducts.length / 4));
+            setCurrentSlide((prev) => (prev + 1) % Math.ceil(products.length / 4));
         }, 5000);
 
         return () => clearInterval(timer);
-    }, [filteredProducts.length]);
 
+    }, [products.length]);
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    // Set selectedCategory to the first category when categories are loaded
+    useEffect(() => {
+        if (categories.length > 0 && !selectedCategory) {
+            setSelectedCategory(categories[0].id);
+        }
+    }, [categories, selectedCategory]);
+    useEffect(() => {
+        if (selectedCategory) {
+            fetchProducts();
+        }
+    }, [selectedCategory]);
     return (
         <section className="w-full min-h-screen bg-gray-950 py-12 font-grotesk">
             <h2 className="text-4xl font-bold text-center mb-12">¡Lo mejor de nuestros productos!</h2>
@@ -54,7 +90,7 @@ const FeaturedProducts = () => {
             {/* Carrusel de productos */}
             <div className="relative px-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {filteredProducts
+                    {products
                         .slice(currentSlide * 4, (currentSlide + 1) * 4)
                         .map((product) => (
                             <ProductCard key={product.id} product={product} />
@@ -64,7 +100,7 @@ const FeaturedProducts = () => {
                 {/* Indicadores del carrusel */}
                 <div className="flex justify-center gap-2 mt-8">
                     {Array.from({
-                        length: Math.ceil(filteredProducts.length / 4),
+                        length: Math.ceil(products.length / 4),
                     }).map((_, index) => (
                         <button
                             key={index}

@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const { page = "1", limit = "10", search = "", sort = "category_name", order = "asc" } = parseResult.data;
+    const { page = "1", limit = "10", search = "", sort = "name", order = "asc" } = parseResult.data;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
