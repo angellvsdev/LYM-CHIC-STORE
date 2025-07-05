@@ -35,7 +35,18 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const validatedData = CreateCategorySchema.parse(body);
+    const parseResult = CreateCategorySchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          message: "Validation Error",
+          errors: parseResult.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+    // Asegura que 'featured' siempre esté presente y sea boolean
+    const validatedData = { ...parseResult.data, featured: parseResult.data.featured ?? false };
 
     const category = await prisma.category.create({
       data: validatedData,
@@ -44,12 +55,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(category, { status: 201 });
   } catch (error) {
     console.error("Error creating category:", error);
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { message: "Validation Error", errors: error.errors },
-        { status: 400 }
-      );
-    }
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }
@@ -81,13 +86,22 @@ export async function PUT(req: NextRequest) {
         { status: 400 }
       );
     }
-
     const body = await req.json();
-    const validatedData = UpdateCategorySchema.parse(body);
+    const parseResult = UpdateCategorySchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          message: "Validation Error",
+          errors: parseResult.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+    const validatedData = parseResult.data;
 
     const category = await prisma.category.update({
       where: {
-        category_id: parseInt(categoryId),
+        id: categoryId,
       },
       data: validatedData,
     });
@@ -129,7 +143,7 @@ export async function DELETE(req: NextRequest) {
 
     await prisma.category.delete({
       where: {
-        category_id: parseInt(categoryId),
+        id: categoryId,
       },
     });
 

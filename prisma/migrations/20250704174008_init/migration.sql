@@ -6,28 +6,35 @@ CREATE TABLE "User" (
     "email_address" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "registration_date" TIMESTAMP(3) NOT NULL,
+    "role" TEXT NOT NULL DEFAULT 'user',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("user_id")
 );
 
 -- CreateTable
 CREATE TABLE "Category" (
-    "category_id" SERIAL NOT NULL,
-    "category_name" TEXT NOT NULL,
-    "category_description" TEXT,
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
+    "featured" BOOLEAN NOT NULL,
 
-    CONSTRAINT "Category_pkey" PRIMARY KEY ("category_id")
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Product" (
-    "product_id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT,
-    "price" DECIMAL(10,2) NOT NULL,
-    "category_id" INTEGER NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "description" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
+    "size" TEXT,
+    "color" TEXT,
+    "featured" BOOLEAN,
+    "categoryId" TEXT NOT NULL,
 
-    CONSTRAINT "Product_pkey" PRIMARY KEY ("product_id")
+    CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -46,7 +53,7 @@ CREATE TABLE "Order" (
 CREATE TABLE "OrderDetail" (
     "order_detail_id" SERIAL NOT NULL,
     "order_id" INTEGER NOT NULL,
-    "product_id" INTEGER NOT NULL,
+    "product_id" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
     "unit_price" DECIMAL(10,2) NOT NULL,
 
@@ -76,7 +83,7 @@ CREATE TABLE "OrderStatusHistory" (
 CREATE UNIQUE INDEX "User_email_address_key" ON "User"("email_address");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Category_category_name_key" ON "Category"("category_name");
+CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Order_order_number_key" ON "Order"("order_number");
@@ -85,7 +92,7 @@ CREATE UNIQUE INDEX "Order_order_number_key" ON "Order"("order_number");
 CREATE UNIQUE INDEX "OrderStatus_status_name_key" ON "OrderStatus"("status_name");
 
 -- AddForeignKey
-ALTER TABLE "Product" ADD CONSTRAINT "Product_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "Category"("category_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD CONSTRAINT "Order_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -97,7 +104,7 @@ ALTER TABLE "Order" ADD CONSTRAINT "Order_order_status_id_fkey" FOREIGN KEY ("or
 ALTER TABLE "OrderDetail" ADD CONSTRAINT "OrderDetail_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "Order"("order_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "OrderDetail" ADD CONSTRAINT "OrderDetail_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product"("product_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "OrderDetail" ADD CONSTRAINT "OrderDetail_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OrderStatusHistory" ADD CONSTRAINT "OrderStatusHistory_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "Order"("order_id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { sessionOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
 import { UpdateOrderSchema } from "@/lib/utils/validation/schemas";
 import { User } from "@/types";
 
@@ -33,15 +34,32 @@ export async function PUT(
       });
     }
 
-    const orderId = parseInt(params.id);
-    if (isNaN(orderId)) {
-      return new NextResponse(JSON.stringify({ message: "Invalid order ID" }), {
-        status: 400,
-      });
+    // Validar que el id sea un número válido
+    const idSchema = z.string().regex(/^\d+$/);
+    const parseResult = idSchema.safeParse(params.id);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          message: "Invalid order ID",
+          errors: parseResult.error.errors,
+        },
+        { status: 400 }
+      );
     }
+    const orderId = parseInt(params.id);
 
     const body = await req.json();
-    const validatedData = UpdateOrderSchema.parse(body);
+    const updateOrderParseResult = UpdateOrderSchema.safeParse(body);
+    if (!updateOrderParseResult.success) {
+      return NextResponse.json(
+        {
+          message: "Validation Error",
+          errors: updateOrderParseResult.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+    const validatedData = updateOrderParseResult.data;
 
     const order = await prisma.order.update({
       where: {
@@ -84,12 +102,19 @@ export async function DELETE(
       });
     }
 
-    const orderId = parseInt(params.id);
-    if (isNaN(orderId)) {
-      return new NextResponse(JSON.stringify({ message: "Invalid order ID" }), {
-        status: 400,
-      });
+    // Validar que el id sea un número válido
+    const idSchema = z.string().regex(/^\d+$/);
+    const parseResult = idSchema.safeParse(params.id);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          message: "Invalid order ID",
+          errors: parseResult.error.errors,
+        },
+        { status: 400 }
+      );
     }
+    const orderId = parseInt(params.id);
 
     // Primero eliminamos los detalles de la orden
     await prisma.orderDetail.deleteMany({

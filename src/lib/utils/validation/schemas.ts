@@ -1,30 +1,22 @@
 import { z } from "zod";
-import {
-  UserSchema,
-  CategorySchema,
-  ProductSchema,
-  OrderSchema,
-  OrderStatusSchema,
-} from "@/types";
+
+// User
+export const UserSchema = z.object({
+  user_id: z.number().int().positive(),
+  name: z.string().min(1).max(255),
+  phone_number: z.string().min(1).max(20),
+  email_address: z.string().email(),
+  password: z.string().min(8).max(255),
+  registration_date: z.date(),
+  role: z.string().min(1).max(20),
+});
 
 export const CreateUserSchema = UserSchema.omit({
   user_id: true,
-  role: true,
   registration_date: true,
-}).extend({
-  password: z.string().min(8).max(255),
+  role: true,
 });
 
-export const LoginUserSchema = UserSchema.omit({
-  user_id: true,
-  registration_date: true,
-  name: true,
-  phone_number: true,
-  role: true,
-}).extend({
-  password: z.string().min(8).max(255),
-});
-//todo: add update user schema
 export const UpdateUserSchema = UserSchema.omit({
   user_id: true,
   registration_date: true,
@@ -32,48 +24,84 @@ export const UpdateUserSchema = UserSchema.omit({
   role: true,
 });
 
+export const LoginUserSchema = z.object({
+  email_address: z.string().email(),
+  password: z.string().min(8).max(255),
+});
+
+// Category
+export const CategorySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(255),
+  description: z.string().max(1000),
+  image: z.string(),
+  featured: z.boolean(),
+});
+
 export const CreateCategorySchema = CategorySchema.omit({
-  category_id: true,
+  id: true,
 }).extend({
-  category_name: z.string().min(1).max(255),
-  category_description: z.string().max(1000).optional(),
+  name: z.string().min(1).max(255),
+  description: z.string().max(1000),
+  image: z.string(),
+  featured: z.boolean().optional(),
 });
 
 export const UpdateCategorySchema = CategorySchema.omit({
-  category_id: true,
-}).extend({
-  category_name: z.string().min(1).max(255),
-  category_description: z.string().max(1000).optional(),
+  id: true,
+}).partial();
+
+// Product
+export const ProductSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(255),
+  price: z.number().positive(),
+  description: z.string(),
+  image: z.string(),
+  size: z.string().optional(),
+  color: z.string().optional(),
+  featured: z.boolean().optional(),
+  categoryId: z.string().uuid(),
 });
 
 export const CreateProductSchema = ProductSchema.omit({
-  product_id: true,
+  id: true,
 }).extend({
   name: z.string().min(1).max(255),
-  description: z.string().max(1000).optional(),
   price: z.number().positive(),
-  category_id: z.number().int().positive(),
+  description: z.string(),
+  image: z.string(),
+  size: z.string().optional(),
+  color: z.string().optional(),
+  featured: z.boolean().optional(),
+  categoryId: z.string().uuid(),
 });
 
 export const UpdateProductSchema = ProductSchema.omit({
-  product_id: true,
-}).extend({
-  name: z.string().min(1).max(255),
-  description: z.string().max(1000).optional(),
-  price: z.number().positive(),
-  category_id: z.number().int().positive(),
+  id: true,
+}).partial();
+
+// Order
+export const OrderSchema = z.object({
+  order_id: z.number().int().positive(),
+  order_number: z.string().min(1).max(50),
+  user_id: z.number().int().positive(),
+  order_date: z.date(),
+  order_status_id: z.number().int().positive(),
+  delivery_method: z.string().min(1).max(50),
 });
 
 export const CreateOrderSchema = OrderSchema.omit({
   order_id: true,
   order_number: true,
   order_date: true,
-  order_status_id: true,
 }).extend({
+  user_id: z.number().int().positive(),
+  order_status_id: z.number().int().positive(),
   delivery_method: z.string().min(1).max(50),
   order_details: z.array(
     z.object({
-      product_id: z.number().int().positive(),
+      product_id: z.string().uuid(),
       quantity: z.number().int().positive(),
       unit_price: z.number().positive(),
     })
@@ -84,14 +112,34 @@ export const UpdateOrderSchema = z.object({
   order_status_id: z.number().int().positive(),
 });
 
+// OrderDetail
+export const OrderDetailSchema = z.object({
+  order_detail_id: z.number().int().positive(),
+  order_id: z.number().int().positive(),
+  product_id: z.string().uuid(),
+  quantity: z.number().int().positive(),
+  unit_price: z.number().positive(),
+});
+
+// OrderStatus
+export const OrderStatusSchema = z.object({
+  order_status_id: z.number().int().positive(),
+  status_name: z.string().min(1).max(50),
+});
+
 export const CreateOrderStatusSchema = OrderStatusSchema.omit({
   order_status_id: true,
-}).extend({
-  status_name: z.string().min(1).max(50),
 });
 
 export const UpdateOrderStatusSchema = OrderStatusSchema.omit({
   order_status_id: true,
-}).extend({
-  status_name: z.string().min(1).max(50),
+});
+
+// OrderStatusHistory
+export const OrderStatusHistorySchema = z.object({
+  order_status_history_id: z.number().int().positive(),
+  order_id: z.number().int().positive(),
+  order_status_id: z.number().int().positive(),
+  change_date: z.date(),
+  notes: z.string().optional(),
 });

@@ -1,0 +1,451 @@
+openapi: 3.0.3
+info:
+  title: Lymchic Store API
+  version: 1.0.0
+  description: API RESTful para la tienda Lymchic Store
+servers:
+  - url: http://localhost:3000/api
+paths:
+  /auth/login:
+    post:
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email_address:
+                  type: string
+                  format: email
+                password:
+                  type: string
+              required: [email_address, password]
+            example:
+              email_address: usuario@correo.com
+              password: supersecreta
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: Login successful
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              example:
+                message: Invalid credentials
+  /auth/register:
+    post:
+      summary: Registrar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email_address:
+                  type: string
+                  format: email
+                phone_number:
+                  type: string
+                password:
+                  type: string
+              required: [name, email_address, phone_number, password]
+            example:
+              name: Juan Perez
+              email_address: juan@correo.com
+              phone_number: "123456789"
+              password: supersecreta
+      responses:
+        '201':
+          description: Usuario creado
+          content:
+            application/json:
+              example:
+                user_id: 1
+                name: Juan Perez
+                email_address: juan@correo.com
+                phone_number: "123456789"
+                registration_date: "2025-07-05T12:00:00.000Z"
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              example:
+                message: Validation Error
+                errors:
+                  - path: [email_address]
+                    message: Invalid email
+        '409':
+          description: Email ya registrado
+          content:
+            application/json:
+              example:
+                message: Email already registered
+  /products:
+    get:
+      summary: Listar productos
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: sort
+          schema: { type: string, enum: [name, price, description, id, image, size, color, featured, categoryId] }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc] }
+        - in: query
+          name: category_id
+          schema: { type: string, format: uuid }
+        - in: query
+          name: min_price
+          schema: { type: number }
+        - in: query
+          name: max_price
+          schema: { type: number }
+      responses:
+        '200':
+          description: Lista de productos
+          content:
+            application/json:
+              example:
+                data:
+                  - id: "b1e2c3d4-5678-1234-9abc-1234567890ab"
+                    name: Camiseta
+                    price: 25.5
+                    description: Camiseta de algodón
+                    image: https://img.com/camisa.png
+                    size: M
+                    color: rojo
+                    featured: true
+                    categoryId: "a1b2c3d4-5678-1234-9abc-1234567890ab"
+                pagination:
+                  total: 1
+                  page: 1
+                  limit: 10
+                  totalPages: 1
+  /products/{id}:
+    get:
+      summary: Obtener producto por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              example:
+                id: "b1e2c3d4-5678-1234-9abc-1234567890ab"
+                name: Camiseta
+                price: 25.5
+                description: Camiseta de algodón
+                image: https://img.com/camisa.png
+                size: M
+                color: rojo
+                featured: true
+                categoryId: "a1b2c3d4-5678-1234-9abc-1234567890ab"
+        '400':
+          description: ID inválido
+          content:
+            application/json:
+              example:
+                message: Invalid product ID
+        '404':
+          description: Producto no encontrado
+          content:
+            application/json:
+              example:
+                message: Product not found
+  /products/admin:
+    post:
+      summary: Crear producto (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                price: { type: number }
+                description: { type: string }
+                image: { type: string }
+                size: { type: string }
+                color: { type: string }
+                featured: { type: boolean }
+                categoryId: { type: string, format: uuid }
+              required: [name, price, description, image, categoryId]
+            example:
+              name: Camiseta
+              price: 25.5
+              description: Camiseta de algodón
+              image: https://img.com/camisa.png
+              size: M
+              color: rojo
+              featured: true
+              categoryId: "a1b2c3d4-5678-1234-9abc-1234567890ab"
+      responses:
+        '201':
+          description: Producto creado
+          content:
+            application/json:
+              example:
+                id: "b1e2c3d4-5678-1234-9abc-1234567890ab"
+                name: Camiseta
+                price: 25.5
+                description: Camiseta de algodón
+                image: https://img.com/camisa.png
+                size: M
+                color: rojo
+                featured: true
+                categoryId: "a1b2c3d4-5678-1234-9abc-1234567890ab"
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              example:
+                message: Validation Error
+                errors:
+                  - path: [name]
+                    message: Required
+  /categories:
+    get:
+      summary: Listar categorías
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: sort
+          schema: { type: string, enum: [name, description, id, image, featured] }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc] }
+      responses:
+        '200':
+          description: Lista de categorías
+          content:
+            application/json:
+              example:
+                data:
+                  - id: "a1b2c3d4-5678-1234-9abc-1234567890ab"
+                    name: Ropa
+                    description: Ropa de moda
+                    image: https://img.com/catropa.png
+                    featured: true
+                pagination:
+                  total: 1
+                  page: 1
+                  limit: 10
+                  totalPages: 1
+  /categories/{id}:
+    get:
+      summary: Obtener categoría por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Categoría encontrada
+          content:
+            application/json:
+              example:
+                id: "a1b2c3d4-5678-1234-9abc-1234567890ab"
+                name: Ropa
+                description: Ropa de moda
+                image: https://img.com/catropa.png
+                featured: true
+        '400':
+          description: ID inválido
+          content:
+            application/json:
+              example:
+                message: Invalid category ID
+        '404':
+          description: Categoría no encontrada
+          content:
+            application/json:
+              example:
+                message: Category not found
+  /categories/admin:
+    post:
+      summary: Crear categoría (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                image: { type: string }
+                featured: { type: boolean }
+              required: [name, description, image, featured]
+            example:
+              name: Ropa
+              description: Ropa de moda
+              image: https://img.com/catropa.png
+              featured: true
+      responses:
+        '201':
+          description: Categoría creada
+          content:
+            application/json:
+              example:
+                id: "a1b2c3d4-5678-1234-9abc-1234567890ab"
+                name: Ropa
+                description: Ropa de moda
+                image: https://img.com/catropa.png
+                featured: true
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              example:
+                message: Validation Error
+                errors:
+                  - path: [name]
+                    message: Required
+  /orders:
+    post:
+      summary: Crear orden
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delivery_method: { type: string }
+                order_details:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id: { type: string, format: uuid }
+                      quantity: { type: integer }
+                      unit_price: { type: number }
+                    required: [product_id, quantity, unit_price]
+              required: [delivery_method, order_details]
+            example:
+              delivery_method: STANDARD
+              order_details:
+                - product_id: "b1e2c3d4-5678-1234-9abc-1234567890ab"
+                  quantity: 2
+                  unit_price: 25.5
+      responses:
+        '201':
+          description: Orden creada
+          content:
+            application/json:
+              example:
+                order_id: 1
+                order_number: ORD-123456
+                user_id: 1
+                order_date: "2025-07-05T12:00:00.000Z"
+                order_status_id: 1
+                delivery_method: STANDARD
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              example:
+                message: Validation Error
+                errors:
+                  - path: [order_details]
+                    message: Required
+  /order-statuses:
+    get:
+      summary: Listar estados de orden
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer }
+        - in: query
+          name: limit
+          schema: { type: integer }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: sort
+          schema: { type: string, enum: [status_name] }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc] }
+      responses:
+        '200':
+          description: Lista de estados de orden
+          content:
+            application/json:
+              example:
+                data:
+                  - order_status_id: 1
+                    status_name: PENDING
+                pagination:
+                  total: 1
+                  page: 1
+                  limit: 10
+                  totalPages: 1
+  /order-statuses/admin:
+    post:
+      summary: Crear estado de orden (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_name: { type: string }
+              required: [status_name]
+            example:
+              status_name: PENDING
+      responses:
+        '201':
+          description: Estado creado
+          content:
+            application/json:
+              example:
+                order_status_id: 1
+                status_name: PENDING
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              example:
+                message: Validation Error
+                errors:
+                  - path: [status_name]
+                    message: Required

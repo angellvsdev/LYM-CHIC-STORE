@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
     // Verificar roles para rutas específicas
     if (request.nextUrl.pathname.startsWith("/api/orders")) {
       // Asegurar que el usuario tenga el rol correcto
-      if (!session.user.role) {
+      if (session.user && !session.user.role) {
         session.user.role = "user";
         await session.save();
       }

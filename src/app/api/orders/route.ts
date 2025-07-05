@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 import { getIronSession, IronSessionData } from "iron-session";
 import { sessionOptions } from "@/lib/auth/config";
+import { createResponse } from "@/lib/utils/api/response";
+import { z } from "zod";
+import { CreateOrderSchema } from "@/lib/utils/validation/schemas";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,6 +29,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const parseResult = CreateOrderSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { message: "Validation Error", errors: parseResult.error.errors },
+        { status: 400 }
+      );
+    }
+    const validatedData = parseResult.data;
 
     const order = await prisma.order.create({
       data: {
@@ -33,11 +44,13 @@ export async function POST(req: NextRequest) {
         order_number: `ORD-${Date.now()}`,
         order_date: new Date(),
         order_status_id: 1, // PENDING
-        delivery_method: body.delivery_method || "STANDARD",
+        delivery_method: validatedData.delivery_method || "STANDARD",
       },
     });
 
-    return NextResponse.json(order, { status: 201 });
+    return createResponse(order, 201, {
+      "Content-Type": "application/json",
+    });
   } catch (error) {
     console.error("Error creating order:", error);
     return NextResponse.json(

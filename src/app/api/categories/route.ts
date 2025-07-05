@@ -3,6 +3,8 @@ import { getIronSession } from "iron-session";
 import { sessionOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
 import { User } from "@/types";
+import { z } from "zod";
+import { CategorySchema } from "@/lib/utils/validation/schemas";
 
 declare module "iron-session" {
   interface IronSessionData {
@@ -29,46 +31,74 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const searchParams = req.nextUrl.searchParams;
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const search = searchParams.get("search") || "";
-    const sort = searchParams.get("sort") || "category_name";
-    const order = searchParams.get("order") || "asc";
+    const querySchema = z.object({
+      page: z.string().regex(/^\d+$/).optional(),
+      limit: z.string().regex(/^\d+$/).optional(),
+      search: z.string().optional(),
+      sort: z
+        .enum(["name", "description", "id", "image", "featured"])
+        .optional(),
+      order: z.enum(["asc", "desc"]).optional(),
+    });
+    const parseResult = querySchema.safeParse(
+      Object.fromEntries(req.nextUrl.searchParams.entries())
+    );
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          message: "Invalid query parameters",
+          errors: parseResult.error.errors,
+        },
+        { status: 400 }
+      );
+    }
 
-    const skip = (page - 1) * limit;
+    const { page = "1", limit = "10", search = "", sort = "category_name", order = "asc" } = parseResult.data;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const [categories, total] = await Promise.all([
       prisma.category.findMany({
         where: {
           OR: [
-            { category_name: { contains: search, mode: "insensitive" } },
-            { category_description: { contains: search, mode: "insensitive" } },
+            { name: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
           ],
         },
         orderBy: {
           [sort]: order,
         },
         skip,
-        take: limit,
+        take: parseInt(limit),
       }),
       prisma.category.count({
         where: {
           OR: [
-            { category_name: { contains: search, mode: "insensitive" } },
-            { category_description: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
           ],
         },
       }),
     ]);
 
+    // Validar la respuesta con CategorySchema[]
+    const categoriesValidation = z.array(CategorySchema).safeParse(categories);
+    if (!categoriesValidation.success) {
+      return NextResponse.json(
+        {
+          message: "Invalid category data returned from database",
+          errors: categoriesValidation.error.errors,
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       data: categories,
       pagination: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / parseInt(limit)),
       },
     });
   } catch (error) {

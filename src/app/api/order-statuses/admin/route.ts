@@ -35,7 +35,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const validatedData = CreateOrderStatusSchema.parse(body);
+    const parseResult = CreateOrderStatusSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          message: "Validation Error",
+          errors: parseResult.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+    const validatedData = parseResult.data;
 
     const orderStatus = await prisma.orderStatus.create({
       data: validatedData,
@@ -81,9 +91,18 @@ export async function PUT(req: NextRequest) {
         { status: 400 }
       );
     }
-
     const body = await req.json();
-    const validatedData = UpdateOrderStatusSchema.parse(body);
+    const parseResult = UpdateOrderStatusSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json(
+        {
+          message: "Validation Error",
+          errors: parseResult.error.errors,
+        },
+        { status: 400 }
+      );
+    }
+    const validatedData = parseResult.data;
 
     const status = await prisma.orderStatus.update({
       where: {

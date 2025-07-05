@@ -10,69 +10,79 @@ datasource db {
 }
 
 model User {
-  user_id       Int       @id @default(autoincrement())
-  name           String
-  phone_number         String
-  email_address String    @unique
-  password       String
-  registration_date   DateTime
-  role           String    @default("user")
-  orders          Order[]
+  user_id           Int       @id @default(autoincrement())
+  name              String
+  phone_number      String
+  email_address     String    @unique
+  password          String
+  registration_date DateTime
+  role              String    @default("user")
+  orders            Order[]
 }
 
 model Category {
-  category_id          Int       @id @default(autoincrement())
-  category_name      String    @unique
-  category_description String?
-  products             Product[]
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  image       String
+  featured    Boolean
+  products    Product[] // A category can have multiple products
 }
 
 model Product {
-  product_id   Int       @id @default(autoincrement())
+  id          String        @id @default(uuid()) // Product ID is a String (UUID)
   name        String
-  description   String?
-  price        Decimal   @db.Decimal(10, 2)
-  category_id Int
-  category     Category @relation(fields: [category_id], references: [category_id])
-  order_details OrderDetail[]
+  price       Float
+  description String
+  image       String
+  size        String?
+  color       String?
+  featured    Boolean?
+  category    Category      @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  orderDetails OrderDetail[] // Add this to define the relation back to OrderDetail
 }
 
 model Order {
-  order_id       Int       @id @default(autoincrement())
-  order_number   String    @unique
-  user_id      Int
-  user         User   @relation(fields: [user_id], references: [user_id])
-  order_date      DateTime
-  order_status_id Int
-  orderStatus    OrderStatus @relation(fields: [order_status_id], references: [order_status_id])
-  order_details  OrderDetail[]
+  order_id           Int                  @id @default(autoincrement())
+  order_number       String               @unique
+  user_id            Int
+  user               User                 @relation(fields: [user_id], references: [user_id])
+  order_date         DateTime
+  order_status_id    Int
+  orderStatus        OrderStatus          @relation(fields: [order_status_id], references: [order_status_id])
+  order_details      OrderDetail[]
   orderStatusHistory OrderStatusHistory[]
-  delivery_method  String
+  delivery_method    String
 }
 
 model OrderDetail {
-  order_detail_id Int       @id @default(autoincrement())
-  order_id         Int
-  order            Order    @relation(fields: [order_id], references: [order_id])
-  product_id       Int
-  product          Product  @relation(fields: [product_id], references: [product_id])
-  quantity          Int
-  unit_price   Decimal   @db.Decimal(10, 2)
+  order_detail_id Int     @id @default(autoincrement())
+  order_id        Int
+  order           Order   @relation(fields: [order_id], references: [order_id])
+  
+  // *** CORRECTED SECTION START ***
+  product_id      String  // This field must be String to match Product.id
+  product         Product @relation(fields: [product_id], references: [id]) // Reference Product.id
+  // *** CORRECTED SECTION END ***
+  
+  quantity        Int
+  unit_price      Decimal @db.Decimal(10, 2)
 }
 
 model OrderStatus {
-  order_status_id Int    @id @default(autoincrement())
-  status_name    String @unique
-  orders          Order[]
+  order_status_id    Int                  @id @default(autoincrement())
+  status_name        String               @unique
+  orders             Order[]
   orderStatusHistory OrderStatusHistory[]
 }
 
 model OrderStatusHistory {
-  order_status_history_id Int    @id @default(autoincrement())
-  order_id         Int
-  order            Order    @relation(fields: [order_id], references: [order_id])
-  order_status_id  Int
-  orderStatus      OrderStatus @relation(fields: [order_status_id], references: [order_status_id])
-  change_date      DateTime
-  notes            String?
+  order_status_history_id Int          @id @default(autoincrement())
+  order_id                Int
+  order                   Order        @relation(fields: [order_id], references: [order_id])
+  order_status_id         Int
+  orderStatus             OrderStatus  @relation(fields: [order_status_id], references: [order_status_id])
+  change_date             DateTime
+  notes                   String?
 }
