@@ -1,19 +1,7 @@
-import NavBar from "./components/design_lib/navbar";
-import Header from "./components/hero_section/heading/header";
-import FeaturedProducts from "./components/hero_section/featured_product_data_fetching/FeaturedProducts";
-import SocialMedia from "./components/hero_section/contact_media/SocialMedia";
-import Footer from "./components/hero_section/credits/Footer";
+import Home_Main from "./components/Home_Main";
 
 export default function Home()  {
-  return (
-    <>
-      <NavBar /> {/* Ensure the Header component is correctly implemented */}
-      <Header />
-      <FeaturedProducts />
-      <SocialMedia />
-      <Footer />
-    </>
-  )
+  return <Home_Main />
 }
 
 

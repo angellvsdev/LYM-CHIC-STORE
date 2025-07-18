@@ -1,5 +1,5 @@
 import React from "react";
-//import Link from "next/link";
+import Link from "next/link";
 import GiftIcon from "@heroicons/react/24/outline/GiftIcon";
 import InformationCircleIcon from "@heroicons/react/24/outline/InformationCircleIcon";
 import PhoneIcon from "@heroicons/react/24/outline/PhoneIcon";
@@ -15,10 +15,10 @@ const Footer = () => {
         <div className="flex flex-col justify-center self-start my-2">
             <h2 className="text-white text-xl font-black md:text-2xl">Navegación</h2>
             <ul className="py-2 text-white  flex flex-col list-none">
-                <li className="flex hover:text-amaranth-pink-200 hover:cursor items-center my-1"><a href="#" className="text-medium font-grotesk"><GiftIcon className="mx-1 h-6 hover:cursor inline" /> Home</a></li>
-                <li className="flex hover:text-amaranth-pink-200 hover:cursor items-center my-1"><a href="#" className="text-medium font-grotesk"><InformationCircleIcon className="mx-1 h-6 hover:cursor inline" /> Sobre Nosotros</a></li>
-                <li className="flex hover:text-amaranth-pink-200 hover:cursor items-center my-1"><a href="#" className="text-medium font-grotesk"><PhoneIcon className="mx-1 h-6 hover:cursor inline" /> Contacto</a></li>
-                <li className="flex hover:text-amaranth-pink-200 hover:cursor items-center my-1"><a href="#" className="text-medium font-grotesk"><ShoppingBagIcon className="mx-1 h-6 hover:cursor inline" /> Tienda</a></li>
+                <li className="flex hover:text-amaranth-pink-200 hover:cursor items-center my-1"><Link href="/" className="text-medium font-grotesk"><GiftIcon className="mx-1 h-6 hover:cursor inline" /> Home</Link></li>
+                <li className="flex hover:text-amaranth-pink-200 hover:cursor items-center my-1"><Link href="#" className="text-medium font-grotesk"><InformationCircleIcon className="mx-1 h-6 hover:cursor inline" /> Sobre Nosotros</Link></li>
+                <li className="flex hover:text-amaranth-pink-200 hover:cursor items-center my-1"><Link href="#" className="text-medium font-grotesk"><PhoneIcon className="mx-1 h-6 hover:cursor inline" /> Contacto</Link></li>
+                <li className="flex hover:text-amaranth-pink-200 hover:cursor items-center my-1"><Link href="/catalog" className="text-medium font-grotesk"><ShoppingBagIcon className="mx-1 h-6 hover:cursor inline" /> Catálogo</Link></li>
 
             </ul>
         </div>
@@ -34,7 +34,7 @@ const Footer = () => {
             <h4 className="text-white text-xl font-black md:text-2xl">Horarios</h4>
             <div className="py-2 text-white flex flex-col">
             <p className="flex items-center my-0.5 font-grotesk font-medium">Lunes a Sabado</p>
-            <p className="flex items-center my-0.5 font-grotesk font-medium">8:00 AM - 4:30 PM</p>
+            <p className="flex items-center my-0.5 font-grotesk font-medium">8:00 AM - 8:00 PM</p>
             </div>
         </div>
     </footer>
@@ -42,28 +42,3 @@ const Footer = () => {
 }
 
 export default Footer;
-
-// <div className="px-4 items-center font-grotesk text-center md:justify-between">
-//             <div className="flex flex-col items-center justify-center content-start">
-//                 <h1 className="text-2xl md:text-4xl text-white font-black">© LYMChic Store. <p className="text-white text-sm">Todos los derechos reservados.</p></h1>
-//                 <p className="text-white text-sm">Hecho con amor por <a href="https://www.instagram.com/angelleonardovs/" target="_blank" rel="noopener noreferrer" className="hover:text-amaranth-pink-500 transition-all duration-300">Angel Vera</a></p>
-//             </div>
-//             <div className="flex flex-col items-center justify-center content-start">
-//                 <h2 className="text-white text-sm font-black">Navegación</h2>
-//                 <ul className="list-none">
-//                     <li>
-//                         <Link href="/" className="hover:text-amaranth-pink-500 transition-all duration-300">Inicio</Link>
-//                     </li>
-//                     <li>
-//                         <Link href="/productos" className="hover:text-amaranth-pink-500 transition-all duration-300">Productos</Link>
-//                     </li>
-//                     <li>
-//                         <Link href="/contacto" className="hover:text-amaranth-pink-500 transition-all duration-300">Contacto</Link>
-//                     </li>
-//                 </ul>
-//             </div>
-//             <div className="flex flex-col items-center justify-center content-start">
-//                 <h1 className="text-2xl md:text-4xl text-white font-black">© LYMChic Store. <p className="text-white text-sm">Todos los derechos reservados.</p></h1>
-//                 <p className="text-white text-sm">Hecho con amor por <a href="https://www.instagram.com/angelleonardovs/" target="_blank" rel="noopener noreferrer" className="hover:text-amaranth-pink-500 transition-all duration-300">Angel Vera</a></p>
-//             </div>
-//         </div>
