@@ -4,6 +4,8 @@ import ProductCard from "./../../design_lib/ProductCard";
 import Image from "next/image";
 import { Category, Product } from "@/lib/utils/validation/schemas";
 import axios from "axios";
+
+
 const FeaturedProducts = () => {
     const [categories, setCategories] = useState<Category[]>([]); // Estado para las categorías
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined); // Inicialmente no hay categoría seleccionada
