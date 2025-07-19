@@ -34,7 +34,7 @@ const Footer = () => {
             <h4 className="text-white text-xl font-black md:text-2xl">Horarios</h4>
             <div className="py-2 text-white flex flex-col">
             <p className="flex items-center my-0.5 font-grotesk font-medium">Lunes a Sabado</p>
-            <p className="flex items-center my-0.5 font-grotesk font-medium">8:00 AM - 8:00 PM</p>
+            <p className="flex items-center my-0.5 font-grotesk font-medium">8:00 AM - 8 PM</p>
             </div>
         </div>
     </footer>

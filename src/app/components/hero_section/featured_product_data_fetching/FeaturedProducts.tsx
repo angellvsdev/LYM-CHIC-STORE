@@ -11,6 +11,7 @@ const FeaturedProducts = () => {
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined); // Inicialmente no hay categoría seleccionada
     const [currentSlide, setCurrentSlide] = useState(0);
     const [products, setProducts] = useState<Product[]>([]); // Estado para los producto
+
     async function fetchCategories() {
         try {
         const response = await axios.get('/api/categories');
