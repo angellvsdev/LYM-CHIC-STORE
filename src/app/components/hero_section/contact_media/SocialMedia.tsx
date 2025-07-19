@@ -1,11 +1,10 @@
 import React from "react";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
-// import { RiTextDirectionL } from "react-icons/ri";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 const SocialMediaSection = () => {
     return (
-        <div className="flex flex-col md:flex-row items-center justify-center h-screen w-full bg-amaranth-pink-100 relative">
+        <div className="flex flex-col md:flex-row items-center justify-center h-screen w-full bg-amaranth-pink-100 relative font-grotesk">
             <div className="flex flex-col items-center justify-center bg-amaranth-pink-500 flex-1 md:h-full">
                 <FaWhatsapp className="text-white text-3xl w-1/4 h-1/4 my-4" />
                 <h1 className="text-white text-2xl md:text-3xl font-bold my-2.5 text-center">¿Te gustaría un pedido más personal?</h1>
