@@ -80,7 +80,7 @@ const Filters: React.FC<FiltersProps> = ({
         )}
       </div>
       {/* Filtro de precio tipo slider */}
-      <div className="px-2 sm:px-6 pt-2 pb-4 w-full">
+      <div className="px-2 sm:px-6 pt-2 pb-4 w-full text-white">
         <label className="block text-gray-500 text-sm mb-2">Precio</label>
         <div className="flex items-center gap-2 mb-2">
           <input
@@ -89,7 +89,7 @@ const Filters: React.FC<FiltersProps> = ({
             max={maxPrice}
             value={localRange[0]}
             onChange={e => handleRangeChange(Number(e.target.value), 0)}
-            className="w-full accent-amaranth-pink-500"
+            className="w-full accent-amaranth-pink-200"
           />
           <input
             type="range"
@@ -97,16 +97,16 @@ const Filters: React.FC<FiltersProps> = ({
             max={maxPrice}
             value={localRange[1]}
             onChange={e => handleRangeChange(Number(e.target.value), 1)}
-            className="w-full accent-amaranth-pink-500"
+            className="w-full accent-amaranth-pink-200"
           />
         </div>
-        <div className="flex justify-between text-gray-700 text-sm">
+        <div className="flex justify-between text-davys-gray-100 text-sm">
           <span>Min: ${localRange[0]}</span>
           <span>Max: ${localRange[1]}</span>
         </div>
         <button
           onClick={applyPriceFilter}
-          className="mt-3 w-full py-2 bg-amaranth-pink-500 text-white rounded-lg font-semibold hover:bg-amaranth-pink-600 transition-all"
+          className="mt-3 w-full py-2 bg-gradient-to-b from-amaranth-pink-200 to-amaranth-pink-300 text-white rounded-lg font-semibold hover:bg-amaranth-pink-100 transition-all"
         >
           Aplicar rango de precio
         </button>
@@ -119,10 +119,10 @@ const Filters: React.FC<FiltersProps> = ({
             <button
               key={cat.id}
               onClick={() => onCategoryChange(cat.id)}
-              className={`w-full px-2 py-2 rounded-lg border font-semibold transition-all duration-200
+              className={`w-full px-2 py-2 rounded-lg border font-semibold transition-all duration-200 cursor-pointer
                 ${selectedCategory === cat.id
-                  ? 'bg-amaranth-pink-500 text-white border-amaranth-pink-500'
-                  : 'bg-white text-amaranth-pink-500 border-amaranth-pink-200 hover:bg-amaranth-pink-50'}
+                  ? 'bg-gradient-to-b from-amaranth-pink-200 to-amaranth-pink-300 text-white'
+                  : 'bg-transparent text-amaranth-pink-100 border-amaranth-pink-100 hover:bg-lavender_blush-200'}
               `}
             >
               {cat.name}
@@ -155,7 +155,7 @@ const Filters: React.FC<FiltersProps> = ({
               onClick={e => e.stopPropagation()}
             >
               <div className="w-12 h-1 bg-amaranth-pink-200 rounded-full mx-auto mt-2 mb-2" />
-              <div className="p-2 sm:p-6">{filtersContent}</div>
+              <div className="p-2 sm:p-6 text-white">{filtersContent}</div>
             </div>
           </div>
         )}
@@ -173,7 +173,7 @@ const Filters: React.FC<FiltersProps> = ({
         Filtros
       </button>
       <div
-        className={`overflow-hidden transition-all duration-300 ${showMenu ? 'max-h-[1000px] animate__animated animate__flipInX' : 'max-h-0'}`}
+        className={`overflow-hidden transition-all duration-300 ${showMenu ? 'max-h-[1000px] animate__animated animate__flipInX' : 'max-h-0 text-white'} text-white`}
         style={{ minHeight: showMenu ? '320px' : '0px' }}
       >
         {showMenu && (
