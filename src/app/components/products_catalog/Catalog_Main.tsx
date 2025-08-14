@@ -16,10 +16,8 @@ const Catalog_Main = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const productsPerPage = 12;
+  const productsPerPage = 10;
 
   // Función para obtener categorías
   async function fetchCategories() {
@@ -52,13 +50,8 @@ const Catalog_Main = () => {
       setProducts(response.data.data);
       
       // Calcular total de páginas (asumiendo que la API devuelve metadata)
-      if (response.data.meta && response.data.meta.total) {
-        setTotalPages(Math.ceil(response.data.meta.total / productsPerPage));
-      }
-      // Si la API devuelve min/max price, actualízalos
-      if (response.data.meta && response.data.meta.min_price !== undefined && response.data.meta.max_price !== undefined) {
-        setMinPrice(response.data.meta.min_price);
-        setMaxPrice(response.data.meta.max_price);
+      if (response.data.pagination && response.data.pagination.total) {
+        setTotalPages(response.data.pagination.totalPages);
       }
     } catch (error) {
       console.error("Error obteniendo productos:", error);
@@ -126,8 +119,8 @@ const Catalog_Main = () => {
                 setSelectedCategory(catId);
                 setCurrentPage(1);
               }}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
+              minPrice={0}
+              maxPrice={1000}
               priceRange={priceRange}
               onPriceChange={(range) => {
                 setPriceRange(range);
@@ -173,7 +166,7 @@ const Catalog_Main = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 cursor-pointer"
                   >
                     Anterior
                   </button>
@@ -185,7 +178,7 @@ const Catalog_Main = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                    className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 cursor-pointer"
                   >
                     Siguiente
                   </button>

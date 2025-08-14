@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 import { hash } from "bcrypt";
-import { CreateUserSchema } from "@/lib/utils/validation/schemas";
+import { RegisterUserSchema } from "@/lib/utils/validation/schemas";
 import { createError } from "@/lib/utils/api/error";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const validatedData = CreateUserSchema.parse(body);
+    const validatedData = RegisterUserSchema.parse(body);
 
     // Verificar si el email ya está registrado
     const existingUser = await prisma.user.findUnique({
@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
         phone_number: validatedData.phone_number,
         password: hashedPassword,
         registration_date: new Date(),
+        gender: validatedData.gender,
+        age: validatedData.age,
       },
     });
 
@@ -49,6 +51,8 @@ export async function POST(req: NextRequest) {
       email_address: user.email_address,
       phone_number: user.phone_number,
       registration_date: user.registration_date,
+      gender: user.gender,
+      age: user.age,
     };
 
     return NextResponse.json(userWithoutPassword, { status: 201 });

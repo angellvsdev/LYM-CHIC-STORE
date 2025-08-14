@@ -9,12 +9,28 @@ export const UserSchema = z.object({
   password: z.string().min(8).max(255),
   registration_date: z.date(),
   role: z.string().min(1).max(20),
+  gender: z.string().optional(),
+  age: z.number().int().min(0).max(120).optional(),
 });
 
 export const CreateUserSchema = UserSchema.omit({
   user_id: true,
   registration_date: true,
   role: true,
+});
+
+// Esquema extendido para el formulario de registro con campos adicionales
+export const RegisterUserSchema = z.object({
+  name: z.string().min(1, "El nombre es requerido").max(255, "El nombre es demasiado largo"),
+  gender: z.string().min(1, "El género es requerido"),
+  age: z.number().int().min(0, "La edad debe ser mayor a 0").max(120, "La edad debe ser menor a 120"),
+  email_address: z.string().email("Email inválido"),
+  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").max(255),
+  confirmPassword: z.string().min(1, "Confirma tu contraseña"),
+  phone_number: z.string().min(1, "El número de teléfono es requerido").max(20),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
 });
 
 export const UpdateUserSchema = UserSchema.omit({
