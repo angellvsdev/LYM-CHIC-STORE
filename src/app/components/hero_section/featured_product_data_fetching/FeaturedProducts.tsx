@@ -60,8 +60,8 @@ const FeaturedProducts = () => {
         }
     }, [selectedCategory]);
     return (
-        <section className="w-full min-h-screen bg-gray-950 py-12 font-grotesk">
-            <h2 className="text-4xl font-bold text-center mb-12">¡Lo mejor de nuestros productos!</h2>
+        <section className="w-full min-h-screen bg-gradient-to-bl from-white to-amaranth-pink-800 py-12 font-grotesk">
+            <h2 className="text-4xl font-bold text-center mb-12 text-gray-950">¡Lo mejor de nuestros productos!</h2>
             
             {/* Grid de categorías */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-6 mb-12">
@@ -107,10 +107,10 @@ const FeaturedProducts = () => {
                     }).map((_, index) => (
                         <button
                             key={index}
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                            className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
                                 currentSlide === index
-                                    ? 'bg-amaranth-pink-100 w-4'
-                                    : 'bg-gray-300'
+                                    ? 'bg-amaranth-pink-400 w-4'
+                                    : 'bg-gray-800'
                             }`}
                             onClick={() => setCurrentSlide(index)}
                         />

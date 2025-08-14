@@ -89,7 +89,7 @@ const Filters: React.FC<FiltersProps> = ({
             max={maxPrice}
             value={localRange[0]}
             onChange={e => handleRangeChange(Number(e.target.value), 0)}
-            className="w-full accent-amaranth-pink-200"
+            className="w-full accent-amaranth-pink-200 cursor-grab"
           />
           <input
             type="range"
@@ -97,7 +97,7 @@ const Filters: React.FC<FiltersProps> = ({
             max={maxPrice}
             value={localRange[1]}
             onChange={e => handleRangeChange(Number(e.target.value), 1)}
-            className="w-full accent-amaranth-pink-200"
+            className="w-full accent-amaranth-pink-200 cursor-grab"
           />
         </div>
         <div className="flex justify-between text-davys-gray-100 text-sm">
@@ -106,7 +106,7 @@ const Filters: React.FC<FiltersProps> = ({
         </div>
         <button
           onClick={applyPriceFilter}
-          className="mt-3 w-full py-2 bg-gradient-to-b from-amaranth-pink-200 to-amaranth-pink-300 text-white rounded-lg font-semibold hover:bg-amaranth-pink-100 transition-all"
+          className="mt-3 w-full py-2 bg-gradient-to-b from-amaranth-pink-200 to-amaranth-pink-300 text-white rounded-lg font-semibold hover:bg-amaranth-pink-100 transition-all cursor-pointer"
         >
           Aplicar rango de precio
         </button>
@@ -166,7 +166,7 @@ const Filters: React.FC<FiltersProps> = ({
   return (
     <div className="w-full mx-auto bg-white rounded-2xl shadow-lg animate__animated animate__fadeIn animate__faster flex flex-col">
       <button
-        className="flex items-center justify-center gap-2 text-base w-full py-3 text-amaranth-pink-200 font-bold rounded-t-2xl rounded-lg bg-gradient-to-br from-white to-amaranth-pink-800 focus:outline-none"
+        className="flex items-center justify-center gap-2 text-base w-full py-3 text-amaranth-pink-200 font-bold rounded-t-2xl rounded-lg bg-gradient-to-br from-white to-amaranth-pink-800 focus:outline-none cursor-pointer"
         onClick={() => setShowMenu((v) => !v)}
       >
         <AdjustmentsHorizontalIcon className="h-6 w-6" />
