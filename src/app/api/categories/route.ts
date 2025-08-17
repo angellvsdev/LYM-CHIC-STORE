@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getIronSession } from "iron-session";
-import { sessionOptions } from "@/lib/auth/config";
+// import { getIronSession } from "iron-session";
+// import { sessionOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
 import { User } from "@/types";
 import { z } from "zod";
@@ -12,18 +12,18 @@ declare module "iron-session" {
   }
 }
 
-type Session = {
-  user?: User;
-};
+// type Session = {
+//   user?: User;
+// };
 
 export async function GET(req: NextRequest) {
   try {
-    const response = NextResponse.next();
-    const session = await getIronSession<Session>(
-      req,
-      response,
-      sessionOptions
-    );
+    // const response = NextResponse.next();
+    // const session = await getIronSession<Session>(
+    //   req,
+    //   response,
+    //   sessionOptions
+    // );
     const querySchema = z.object({
       page: z.string().regex(/^\d+$/).optional(),
       limit: z.string().regex(/^\d+$/).optional(),

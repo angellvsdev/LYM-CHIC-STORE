@@ -7,7 +7,6 @@ import {
   UpdateCategorySchema,
 } from "@/lib/utils/validation/schemas";
 import { User } from "@/types";
-import { z } from "zod";
 
 declare module "iron-session" {
   interface IronSessionData {
