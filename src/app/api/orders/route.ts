@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma/client";
 import { getIronSession, IronSessionData } from "iron-session";
 import { sessionOptions } from "@/lib/auth/config";
 import { createResponse } from "@/lib/utils/api/response";
-import { z } from "zod";
+// z import removed - not used
 import { CreateOrderSchema } from "@/lib/utils/validation/schemas";
 
 export async function POST(req: NextRequest) {

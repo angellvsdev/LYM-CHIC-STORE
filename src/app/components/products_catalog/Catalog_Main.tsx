@@ -84,14 +84,14 @@ const Catalog_Main = () => {
       setCurrentPage(1); // Resetear a la primera página
       fetchProducts();
     }
-  }, [selectedCategory, searchTerm, priceRange]); // Añadir priceRange a las dependencias
+  }, [selectedCategory, searchTerm, priceRange, fetchProducts]); // Añadir fetchProducts a las dependencias
 
   // Cargar productos cuando cambia la página
   useEffect(() => {
     if (selectedCategory) {
       fetchProducts();
     }
-  }, [currentPage]);
+  }, [currentPage, selectedCategory, fetchProducts]);
 
   return (
     <>

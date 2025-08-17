@@ -58,7 +58,7 @@ const FeaturedProducts = () => {
         if (selectedCategory) {
             fetchProducts();
         }
-    }, [selectedCategory]);
+    }, [selectedCategory, fetchProducts]);
     return (
         <section className="w-full min-h-screen bg-gradient-to-bl from-white to-amaranth-pink-800 py-12 font-grotesk">
             <h2 className="text-4xl font-bold text-center mb-12 text-gray-950">¡Lo mejor de nuestros productos!</h2>
