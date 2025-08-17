@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getIronSession } from "iron-session";
-import { sessionOptions } from "@/lib/auth/config";
+// import { getIronSession } from "iron-session";
+// import { sessionOptions } from "@/lib/auth/config";
 import { prisma } from "@/lib/prisma";
 import { User } from "@/types";
 import { Prisma } from "@prisma/client";
@@ -13,18 +13,18 @@ declare module "iron-session" {
   }
 }
 
-type Session = {
-  user?: User;
-};
+// type Session = {
+//   user?: User;
+// };
 
 export async function GET(req: NextRequest) {
   try {
-    const response = NextResponse.next();
-    const session = await getIronSession<Session>(
-      req,
-      response,
-      sessionOptions
-    );
+    // const response = NextResponse.next();
+    // const session = await getIronSession<Session>(
+    //   req,
+    //   response,
+    //   sessionOptions
+    // );
 
     // if (!session.user) {
     //   return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
