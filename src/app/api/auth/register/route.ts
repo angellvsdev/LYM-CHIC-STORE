@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { hash } from "bcrypt";
 import { RegisterUserSchema } from "@/lib/utils/validation/schemas";
 import { createError } from "@/lib/utils/api/error";
