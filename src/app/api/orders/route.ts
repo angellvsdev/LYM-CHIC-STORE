@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getIronSession, IronSessionData } from "iron-session";
 import { sessionOptions } from "@/lib/auth/config";
 import { createResponse } from "@/lib/utils/api/response";

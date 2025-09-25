@@ -9,7 +9,19 @@
     "lint": "next lint",
     "prisma:seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "setup": "node scripts/setup-env.js",
+    "quick-setup": "node scripts/quick-setup.js",
+    "diagnose": "node scripts/diagnose-db.js",
+    "test-api": "node scripts/test-api.js",
+    "test-catalog": "node scripts/test-catalog.js",
+    "test-zod": "node scripts/test-zod.js",
+    "check-config": "node scripts/check-config.js",
+    "universal-setup": "node scripts/universal-setup.js",
+    "db:reset": "npx prisma migrate reset --force",
+    "db:migrate": "npx prisma migrate dev",
+    "db:seed": "npx prisma db seed",
+    "db:studio": "npx prisma studio"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

@@ -97,6 +97,27 @@ export const UpdateProductSchema = ProductSchema.omit({
   id: true,
 }).partial();
 
+// Query Parameters for Products API
+export const ProductsQuerySchema = z.object({
+  category_id: z.string().uuid().optional(),
+  search: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  sort: z.enum(['name', 'price', 'createdAt', 'updatedAt']).default('name'),
+  order: z.enum(['asc', 'desc']).default('asc'),
+  min_price: z.coerce.number().min(0).default(0),
+  max_price: z.coerce.number().min(0).default(1000),
+});
+
+// Query Parameters for Categories API
+export const CategoriesQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  sort: z.enum(['name', 'createdAt', 'updatedAt']).default('name'),
+  order: z.enum(['asc', 'desc']).default('asc'),
+  featured: z.enum(['true', 'false']).transform((val) => val === 'true').optional(),
+});
+
 // Order
 export const OrderSchema = z.object({
   order_id: z.number().int().positive(),
@@ -173,6 +194,8 @@ export type UpdateCategory = z.infer<typeof UpdateCategorySchema>;
 export type Product = z.infer<typeof ProductSchema>;
 export type CreateProduct = z.infer<typeof CreateProductSchema>;
 export type UpdateProduct = z.infer<typeof UpdateProductSchema>;
+export type ProductsQuery = z.infer<typeof ProductsQuerySchema>;
+export type CategoriesQuery = z.infer<typeof CategoriesQuerySchema>;
 
 export type Order = z.infer<typeof OrderSchema>;
 export type CreateOrder = z.infer<typeof CreateOrderSchema>;

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { POST, GET } from "../route";
-import { prisma } from "@/lib/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getIronSession } from "iron-session";
 
 // Mock de getIronSession
