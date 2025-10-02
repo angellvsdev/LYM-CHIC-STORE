@@ -66,7 +66,6 @@ const ProductsOverview: React.FC = () => {
                 setProducts(response.data.data.data);
             }
         } catch (error) {
-            console.error('Error fetching products:', error);
         } finally {
             setLoading(false);
         }
@@ -76,8 +75,8 @@ const ProductsOverview: React.FC = () => {
     const fetchCategories = async () => {
         try {
             const response = await axios.get('/api/categories');
-            if (response.data) {
-                setCategories(response.data.data);
+            if (response.data.success && response.data.data.data) {
+                setCategories(response.data.data.data);
             }
         } catch (error) {
             console.error('Error fetching categories:', error);

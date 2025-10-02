@@ -48,13 +48,16 @@ export async function GET(req: NextRequest) {
     console.log(`✅ Found ${categories.length} categories`);
 
     return NextResponse.json({
-      data: categories,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
+      success: true,
+      data: {
+        data: categories,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      }
     });
   } catch (error) {
     console.error("❌ Error fetching categories:", error);

@@ -103,7 +103,7 @@ export const ProductsQuerySchema = z.object({
   search: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
-  sort: z.enum(['name', 'price', 'createdAt', 'updatedAt']).default('name'),
+  sort: z.enum(['name', 'price', 'id']).default('name'), // Solo campos que existen en el schema
   order: z.enum(['asc', 'desc']).default('asc'),
   min_price: z.coerce.number().min(0).default(0),
   max_price: z.coerce.number().min(0).default(1000),
@@ -113,7 +113,7 @@ export const ProductsQuerySchema = z.object({
 export const CategoriesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(50),
-  sort: z.enum(['name', 'createdAt', 'updatedAt']).default('name'),
+  sort: z.enum(['name', 'id']).default('name'), // Solo campos que existen en el schema
   order: z.enum(['asc', 'desc']).default('asc'),
   featured: z.enum(['true', 'false']).transform((val) => val === 'true').optional(),
 });

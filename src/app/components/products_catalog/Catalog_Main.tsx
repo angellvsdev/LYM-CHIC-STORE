@@ -23,8 +23,10 @@ const Catalog_Main = () => {
   async function fetchCategories() {
     try {
       const response = await axios.get('/api/categories');
-      console.log('Categorías obtenidas:', response.data.data);
-      setCategories(response.data.data);
+      if (response.data.success && response.data.data.data) {
+        console.log('Categorías obtenidas:', response.data.data.data);
+        setCategories(response.data.data.data);
+      }
     } catch (error) {
       console.error("Error obteniendo categorías:", error);
     }

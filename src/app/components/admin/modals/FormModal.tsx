@@ -35,13 +35,23 @@ const FormModal: React.FC<FormModalProps> = ({
     fields,
     initialData = {},
 }) => {
-    const [formData, setFormData] = useState<Record<string, any>>(initialData);
+    const [formData, setFormData] = useState<Record<string, any>>({});
+    const isFirstRender = React.useRef(true);
 
+    // Initialize form data when modal opens
     React.useEffect(() => {
         if (isOpen) {
-            setFormData(initialData);
+            // Only set initial data on first open or when opening after close
+            setFormData(initialData || {});
         }
-    }, [isOpen, initialData]);
+        // Cleanup on unmount or when modal closes
+        return () => {
+            if (!isOpen && !isFirstRender.current) {
+                setFormData({});
+            }
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     const handleInputChange = (name: string, value: any) => {
         setFormData(prev => ({ ...prev, [name]: value }));
