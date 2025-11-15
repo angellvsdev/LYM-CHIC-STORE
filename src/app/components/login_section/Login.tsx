@@ -1,6 +1,40 @@
-import React from "react";
+'use client';
+
+import React, { useState } from "react";
+import { useAuth } from "../../../hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [rememberMe, setRememberMe] = useState(false);
+  const { login, isLoading, error } = useAuth();
+  const router = useRouter();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.email || !formData.password) {
+      return;
+    }
+
+    const success = await login(formData.email, formData.password);
+
+    if (success) {
+      router.push('/');
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-bl from-white to-amaranth-pink-800">
       <div className="w-full max-w-4xl rounded-2xl shadow-lg flex flex-col md:flex-row overflow-hidden shadow-gray-400">
@@ -14,16 +48,29 @@ const Login = () => {
         {/* Sección Derecha: Formulario */}
         <div className="md:w-1/2 w-full bg-gradient-to-bl from-white to-amaranth-pink-800 p-8 flex flex-col justify-center font-grotesk">
           <h3 className="text-2xl font-semibold text-amaranth-pink-300 mb-6">Iniciar Sesión</h3>
-          <form className="flex flex-col gap-4">
+
+          {error && (
+            <div className="mb-4 p-3 rounded text-sm bg-red-100 text-red-800 border border-red-300">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <input
               type="email"
+              name="email"
               placeholder="Correo electrónico"
+              value={formData.email}
+              onChange={handleInputChange}
               className="px-4 py-2 rounded bg-lavender-blush-400 text-white focus:outline-none focus:ring-1 focus:ring-amaranth-pink-300"
               required
             />
             <input
               type="password"
+              name="password"
               placeholder="Contraseña"
+              value={formData.password}
+              onChange={handleInputChange}
               className="px-4 py-2 rounded bg-lavender-blush-400 text-white focus:outline-none focus:ring-1 focus:ring-amaranth-pink-300"
               required
             />
@@ -31,6 +78,8 @@ const Login = () => {
               <label className="flex items-center text-davys-gray-100 text-sm">
                 <input
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="mr-2 rounded focus:ring-amaranth-pink-300"
                 />
                 Recordarme
@@ -41,9 +90,10 @@ const Login = () => {
             </div>
             <button
               type="submit"
-              className="mt-2 bg-amaranth-pink-300 cursor-pointer hover:bg-amaranth-pink-200 text-white font-bold py-2 rounded transition-colors"
+              disabled={isLoading}
+              className="mt-2 bg-amaranth-pink-300 cursor-pointer hover:bg-amaranth-pink-200 text-white font-bold py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Iniciar Sesión
+              {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </button>
           </form>
           <div className="mt-6 text-center">
