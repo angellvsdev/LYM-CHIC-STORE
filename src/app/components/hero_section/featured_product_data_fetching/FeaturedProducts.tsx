@@ -14,9 +14,11 @@ const FeaturedProducts = () => {
 
     async function fetchCategories() {
         try {
-        const response = await axios.get('/api/categories');
-        console.log(response.data.data);
-        setCategories(response.data.data);
+            const response = await axios.get('/api/categories');
+            if (response.data.success && response.data.data.data) {
+                console.log(response.data.data.data);
+                setCategories(response.data.data.data);
+            }
         }
         catch (error) {
             console.error("Error fetching categories:", error);

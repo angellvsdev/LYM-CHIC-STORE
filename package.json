@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prisma:seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
+    "prisma:seed": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "setup": "node scripts/setup-env.js",
@@ -21,10 +21,20 @@
     "db:reset": "npx prisma migrate reset --force",
     "db:migrate": "npx prisma migrate dev",
     "db:seed": "npx prisma db seed",
-    "db:studio": "npx prisma studio"
+    "db:studio": "npx prisma studio",
+    "db:create-test-users": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/create-test-users.ts",
+    "db:diagnose-users": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/diagnose-users.ts",
+    "db:test-users": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/test-user-creation.ts",
+    "db:simulate-login": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/simulate-login.ts",
+    "db:comprehensive-test": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/comprehensive-test.ts",
+    "db:direct-users": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/direct-user-creation.ts",
+    "db:final-verification": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/final-verification.ts",
+    "db:create-fresh-admin": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/create-fresh-admin.ts",
+    "db:fix-user-roles": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/fix-user-roles.ts",
+    "test-login-api": "node scripts/test-login-api.js"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" prisma/seed.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -61,7 +71,6 @@
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "prisma": "^6.5.0",
-    "tailwindcss": "^4",
     "ts-jest": "^29.3.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

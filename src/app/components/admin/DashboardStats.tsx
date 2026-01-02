@@ -19,11 +19,6 @@ interface DashboardStatsProps {
 }
 
 const DashboardStats: React.FC<DashboardStatsProps> = ({ data }) => {
-    const moneyFormatter = new Intl.NumberFormat('es-ES', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
-
     const stats = [
         {
             title: 'Pedidos Totales',
@@ -35,7 +30,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ data }) => {
         },
         {
             title: 'Ingresos Totales',
-            value: `$${moneyFormatter.format(data.totalRevenue)}`,
+            value: `$${data.totalRevenue.toLocaleString()}`,
             icon: CurrencyDollarIcon,
             color: 'from-pale-purple-400 to-lavender-blush-400',
             change: '+8%',

@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
     UserIcon,
     EnvelopeIcon,
@@ -22,6 +23,8 @@ interface Customer {
     lastOrder: string;
     registeredAt: string;
     status: 'active' | 'inactive';
+    age?: number | null;
+    gender?: string | null;
 }
 
 const CustomersOverview: React.FC = () => {
@@ -29,53 +32,27 @@ const CustomersOverview: React.FC = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
-    const [customers] = useState<Customer[]>([
-        {
-            id: '1',
-            name: 'Laura García',
-            email: 'laura.garcia@email.com',
-            phone: '+1 555-123-4567',
-            totalOrders: 5,
-            totalSpent: 234.50,
-            lastOrder: '2024-10-27',
-            registeredAt: '2024-09-15',
-            status: 'active'
-        },
-        {
-            id: '2',
-            name: 'Carlos Rodríguez',
-            email: 'carlos.rodriguez@email.com',
-            phone: '+1 555-987-6543',
-            totalOrders: 3,
-            totalSpent: 156.75,
-            lastOrder: '2024-10-25',
-            registeredAt: '2024-10-01',
-            status: 'active'
-        },
-        {
-            id: '3',
-            name: 'María López',
-            email: 'maria.lopez@email.com',
-            phone: '+1 555-456-7890',
-            totalOrders: 8,
-            totalSpent: 445.20,
-            lastOrder: '2024-10-20',
-            registeredAt: '2024-08-20',
-            status: 'active'
-        },
-        {
-            id: '4',
-            name: 'Juan Pérez',
-            email: 'juan.perez@email.com',
-            phone: '+1 555-321-6540',
-            totalOrders: 1,
-            totalSpent: 28.75,
-            lastOrder: '2024-10-15',
-            registeredAt: '2024-10-10',
-            status: 'inactive'
+    const [loading, setLoading] = useState(true);
+    const [customers, setCustomers] = useState<Customer[]>([]);
+
+    // Fetch customers from API
+    const fetchCustomers = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/admin/customers');
+            if (response.data.success) {
+                setCustomers(response.data.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+        } finally {
+            setLoading(false);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
 
     const getStatusInfo = (status: Customer['status']) => {
         switch (status) {
@@ -94,25 +71,45 @@ const CustomersOverview: React.FC = () => {
         return { label: 'Nuevo', color: 'text-green-600' };
     };
 
-    const handleAddCustomer = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        // Lógica para agregar cliente
-        setTimeout(() => {
-            setIsSubmitting(false);
+    const handleAddCustomer = async (formData: Record<string, any>) => {
+        try {
+            setIsSubmitting(true);
+            await axios.post('/api/admin/customers', {
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password || 'changeme'
+            });
             setShowAddModal(false);
-        }, 1000);
+            await fetchCustomers();
+        } catch (error) {
+            console.error('Error adding customer:', error);
+            alert('Error al agregar cliente');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleEditCustomer = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        // Lógica para editar cliente
-        setTimeout(() => {
-            setIsSubmitting(false);
+    const handleEditCustomer = async (formData: Record<string, any>) => {
+        if (!selectedCustomer) return;
+        try {
+            setIsSubmitting(true);
+            await axios.put(`/api/admin/customers/${selectedCustomer.id}`, {
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                age: formData.age,
+                gender: formData.gender
+            });
             setShowEditModal(false);
             setSelectedCustomer(null);
-        }, 1000);
+            await fetchCustomers();
+        } catch (error) {
+            console.error('Error updating customer:', error);
+            alert('Error al actualizar cliente');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const openEditModal = (customer: Customer) => {
@@ -133,13 +130,19 @@ const CustomersOverview: React.FC = () => {
                             <PlusIcon className="w-4 h-4" />
                             <span className="text-xs sm:text-sm font-medium">Agregar</span>
                         </button>
-                        <button className="text-amaranth-pink-400 hover:text-amaranth-pink-500 text-sm font-medium">
-                            Ver todos
-                        </button>
                     </div>
                 </div>
             </div>
             
+            {loading ? (
+                <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amaranth-pink-400"></div>
+                    <span className="ml-3 text-davys-gray-600 text-lg">Cargando clientes...</span>
+                </div>
+            ) : customers.length === 0 ? (
+                <div className="text-center text-davys-gray-500 py-12">No hay clientes registrados.</div>
+            ) : (
+            <>
             {/* Vista de tarjetas para móviles */}
             <div className="block lg:hidden p-4 space-y-4">
                 {customers.map((customer) => {
@@ -320,6 +323,8 @@ const CustomersOverview: React.FC = () => {
                     </tbody>
                 </table>
             </div>
+            </>
+            )}
 
             {/* Modales */}
             <FormModal
@@ -329,50 +334,13 @@ const CustomersOverview: React.FC = () => {
                 title="Agregar Cliente"
                 description="Completa la información del nuevo cliente"
                 isSubmitting={isSubmitting}
-            >
-                <div>
-                    <label className="block text-sm font-medium text-davys-gray-700 mb-2">
-                        Nombre Completo
-                    </label>
-                    <input
-                        type="text"
-                        className="w-full px-3 py-2 border border-davys-gray-300 rounded-lg focus:ring-2 focus:ring-amaranth-pink-400 focus:border-transparent"
-                        placeholder="Ej: Laura García"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-davys-gray-700 mb-2">
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        className="w-full px-3 py-2 border border-davys-gray-300 rounded-lg focus:ring-2 focus:ring-amaranth-pink-400 focus:border-transparent"
-                        placeholder="cliente@email.com"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-davys-gray-700 mb-2">
-                        Teléfono
-                    </label>
-                    <input
-                        type="tel"
-                        className="w-full px-3 py-2 border border-davys-gray-300 rounded-lg focus:ring-2 focus:ring-amaranth-pink-400 focus:border-transparent"
-                        placeholder="+1 555-123-4567"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-davys-gray-700 mb-2">
-                        Estado
-                    </label>
-                    <select className="w-full px-3 py-2 border border-davys-gray-300 rounded-lg focus:ring-2 focus:ring-amaranth-pink-400 focus:border-transparent">
-                        <option value="active">Activo</option>
-                        <option value="inactive">Inactivo</option>
-                    </select>
-                </div>
-            </FormModal>
+                fields={[
+                    { name: 'name', label: 'Nombre Completo', type: 'text', required: true },
+                    { name: 'email', label: 'Email', type: 'text', required: true },
+                    { name: 'phone', label: 'Teléfono', type: 'text', required: true },
+                    { name: 'password', label: 'Contraseña', type: 'text', required: false }
+                ]}
+            />
 
             <FormModal
                 isOpen={showEditModal}
@@ -384,53 +352,26 @@ const CustomersOverview: React.FC = () => {
                 title="Editar Cliente"
                 description="Modifica la información del cliente"
                 isSubmitting={isSubmitting}
-            >
-                <div>
-                    <label className="block text-sm font-medium text-davys-gray-700 mb-2">
-                        Nombre Completo
-                    </label>
-                    <input
-                        type="text"
-                        defaultValue={selectedCustomer?.name}
-                        className="w-full px-3 py-2 border border-davys-gray-300 rounded-lg focus:ring-2 focus:ring-amaranth-pink-400 focus:border-transparent"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-davys-gray-700 mb-2">
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        defaultValue={selectedCustomer?.email}
-                        className="w-full px-3 py-2 border border-davys-gray-300 rounded-lg focus:ring-2 focus:ring-amaranth-pink-400 focus:border-transparent"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-davys-gray-700 mb-2">
-                        Teléfono
-                    </label>
-                    <input
-                        type="tel"
-                        defaultValue={selectedCustomer?.phone}
-                        className="w-full px-3 py-2 border border-davys-gray-300 rounded-lg focus:ring-2 focus:ring-amaranth-pink-400 focus:border-transparent"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-davys-gray-700 mb-2">
-                        Estado
-                    </label>
-                    <select 
-                        defaultValue={selectedCustomer?.status}
-                        className="w-full px-3 py-2 border border-davys-gray-300 rounded-lg focus:ring-2 focus:ring-amaranth-pink-400 focus:border-transparent"
-                    >
-                        <option value="active">Activo</option>
-                        <option value="inactive">Inactivo</option>
-                    </select>
-                </div>
-            </FormModal>
+                initialData={selectedCustomer ? {
+                    name: selectedCustomer.name,
+                    email: selectedCustomer.email,
+                    phone: selectedCustomer.phone,
+                    age: selectedCustomer.age,
+                    gender: selectedCustomer.gender
+                } : undefined}
+                fields={[
+                    { name: 'name', label: 'Nombre Completo', type: 'text', required: true },
+                    { name: 'email', label: 'Email', type: 'text', required: true },
+                    { name: 'phone', label: 'Teléfono', type: 'text', required: true },
+                    { name: 'age', label: 'Edad', type: 'text', required: false },
+                    { name: 'gender', label: 'Género', type: 'select', required: false, options: [
+                        { value: '', label: 'No especificado' },
+                        { value: 'male', label: 'Masculino' },
+                        { value: 'female', label: 'Femenino' },
+                        { value: 'other', label: 'Otro' }
+                    ]}
+                ]}
+            />
         </div>
     );
 };

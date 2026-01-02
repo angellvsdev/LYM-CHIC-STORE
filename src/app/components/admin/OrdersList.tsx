@@ -44,8 +44,6 @@ interface PaginatedResponse<T> {
 }
 
 const OrdersList: React.FC = () => {
-    const dateFormatter = new Intl.DateTimeFormat('es-ES', { timeZone: 'UTC' });
-
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
@@ -279,7 +277,7 @@ const OrdersList: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="mt-2 text-xs text-davys-gray-500">
-                                                {dateFormatter.format(new Date(order.createdAt))}
+                                                {new Date(order.createdAt).toLocaleDateString()}
                                             </div>
                                         </div>
 
@@ -313,7 +311,7 @@ const OrdersList: React.FC = () => {
                                                             {statusInfo.label}
                                                         </span>
                                                         <span className="text-xs text-davys-gray-500">
-                                                            {dateFormatter.format(new Date(order.createdAt))}
+                                                            {new Date(order.createdAt).toLocaleDateString()}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -427,7 +425,7 @@ const OrdersList: React.FC = () => {
                     { label: 'Total', value: `$${selectedOrder.total.toFixed(2)}` },
                     { label: 'Estado', value: getStatusInfo(selectedOrder.status).label },
                     { label: 'Método de entrega', value: selectedOrder.deliveryMethod === 'pickup' ? 'Recoger en tienda' : 'Entrega a domicilio' },
-                    { label: 'Creado', value: dateFormatter.format(new Date(selectedOrder.createdAt)) }
+                    { label: 'Creado', value: new Date(selectedOrder.createdAt).toLocaleDateString() }
                 ] : []}
             />
         </div>

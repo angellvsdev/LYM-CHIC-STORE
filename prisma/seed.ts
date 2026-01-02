@@ -798,6 +798,42 @@ async function main() {
   });
   console.log("Order details created.");
 
+  // Crear usuarios de prueba adicionales
+  console.log("Creating additional test users...");
+  const hashedPassword1 = await bcrypt.hash("admin123456", 10);
+  const hashedPassword2 = await bcrypt.hash("user123456", 10);
+
+  await prisma.user.upsert({
+    where: { email_address: "admin@test.com" },
+    update: {},
+    create: {
+      name: "Administrador Prueba",
+      phone_number: "+1234567890",
+      email_address: "admin@test.com",
+      password: hashedPassword1,
+      registration_date: new Date(),
+      role: "admin",
+      age: 30,
+      gender: "masculino",
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email_address: "user@test.com" },
+    update: {},
+    create: {
+      name: "Usuario Prueba",
+      phone_number: "+0987654321",
+      email_address: "user@test.com",
+      password: hashedPassword2,
+      registration_date: new Date(),
+      role: "user",
+      age: 25,
+      gender: "femenino",
+    },
+  });
+  console.log("Additional test users created.");
+
   console.log("Seed data created successfully!");
 }
 

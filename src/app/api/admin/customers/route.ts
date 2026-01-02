@@ -12,51 +12,50 @@ export async function GET(request: NextRequest) {
         const dateFrom = searchParams.get('dateFrom');
         const dateTo = searchParams.get('dateTo');
 
-        // Construir filtros
+        // Construir filtros usando campos correctos del schema Prisma
         const where: any = {
-            role: 'customer' // Solo clientes, no administradores
+            role: 'user' // Schema usa 'user' como valor por defecto
         };
         
-        if (status) {
-            where.status = status;
-        }
+        // Nota: status no existe en el schema User actual
+        // Si se necesita, debe agregarse al schema Prisma
         
         if (search) {
             where.OR = [
                 { name: { contains: search, mode: 'insensitive' } },
-                { email: { contains: search, mode: 'insensitive' } },
-                { phone: { contains: search, mode: 'insensitive' } }
+                { email_address: { contains: search, mode: 'insensitive' } },
+                { phone_number: { contains: search, mode: 'insensitive' } }
             ];
         }
         
         if (dateFrom || dateTo) {
-            where.createdAt = {};
+            where.registration_date = {};
             if (dateFrom) {
-                where.createdAt.gte = new Date(dateFrom);
+                where.registration_date.gte = new Date(dateFrom);
             }
             if (dateTo) {
-                where.createdAt.lte = new Date(dateTo);
+                where.registration_date.lte = new Date(dateTo);
             }
         }
 
-        // Obtener clientes con paginación
+        // Obtener clientes con paginación usando campos reales del schema
         const [customers, total] = await Promise.all([
             prisma.user.findMany({
                 where,
                 skip: (page - 1) * limit,
                 take: limit,
                 orderBy: {
-                    createdAt: 'desc'
+                    registration_date: 'desc'
                 },
                 select: {
-                    id: true,
+                    user_id: true,
                     name: true,
-                    email: true,
-                    phone: true,
-                    address: true,
-                    status: true,
-                    createdAt: true,
-                    updatedAt: true,
+                    email_address: true,
+                    phone_number: true,
+                    registration_date: true,
+                    role: true,
+                    age: true,
+                    gender: true,
                     _count: {
                         select: {
                             orders: true
@@ -64,11 +63,16 @@ export async function GET(request: NextRequest) {
                     },
                     orders: {
                         select: {
-                            total: true,
-                            createdAt: true
+                            order_date: true,
+                            order_details: {
+                                select: {
+                                    quantity: true,
+                                    unit_price: true
+                                }
+                            }
                         },
                         orderBy: {
-                            createdAt: 'desc'
+                            order_date: 'desc'
                         },
                         take: 1
                     }
@@ -79,21 +83,26 @@ export async function GET(request: NextRequest) {
 
         // Transformar datos para el frontend
         const transformedCustomers: Customer[] = customers.map(customer => {
-            const totalSpent = customer.orders.reduce((sum, order) => sum + order.total, 0);
-            const lastOrder = customer.orders[0]?.createdAt.toISOString() || null;
+            // Calcular total gastado desde order_details
+            const totalSpent = customer.orders.reduce((sum, order) => {
+                const orderTotal = order.order_details.reduce((orderSum, detail) => {
+                    return orderSum + (Number(detail.unit_price) * detail.quantity);
+                }, 0);
+                return sum + orderTotal;
+            }, 0);
+            
+            const lastOrder = customer.orders[0]?.order_date.toISOString() || null;
 
             return {
-                id: customer.id,
+                id: String(customer.user_id),
                 name: customer.name,
-                email: customer.email,
-                phone: customer.phone,
+                email: customer.email_address,
+                phone: customer.phone_number,
                 totalOrders: customer._count.orders,
                 totalSpent,
                 lastOrder: lastOrder ? new Date(lastOrder).toISOString().split('T')[0] : 'Nunca',
-                registeredAt: customer.createdAt.toISOString().split('T')[0],
-                status: customer.status as Customer['status'],
-                address: customer.address || undefined,
-                notes: undefined // Los clientes no tienen notas por defecto
+                registeredAt: customer.registration_date.toISOString().split('T')[0],
+                status: 'active' as Customer['status'], // Valor por defecto ya que no existe en schema
             };
         });
 
@@ -127,7 +136,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, email, phone, address } = body;
+        const { name, email, phone, password } = body;
 
         // Validaciones básicas
         if (!name || !email || !phone) {
@@ -140,9 +149,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Verificar si el email ya existe
+        // Verificar si el email ya existe (usando campo correcto)
         const existingCustomer = await prisma.user.findUnique({
-            where: { email }
+            where: { email_address: email }
         });
 
         if (existingCustomer) {
@@ -155,21 +164,27 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Crear cliente
+        // Crear cliente usando campos correctos del schema
         const customer = await prisma.user.create({
             data: {
                 name,
-                email,
-                phone,
-                address: address || undefined,
-                role: 'customer',
-                status: 'active'
+                email_address: email,
+                phone_number: phone,
+                password: password || 'changeme', // Requerido por schema
+                registration_date: new Date(),
+                role: 'user'
             }
         });
 
         return NextResponse.json({
             success: true,
-            data: customer,
+            data: {
+                id: String(customer.user_id),
+                name: customer.name,
+                email: customer.email_address,
+                phone: customer.phone_number,
+                registeredAt: customer.registration_date.toISOString().split('T')[0]
+            },
             message: 'Cliente creado correctamente'
         });
 
