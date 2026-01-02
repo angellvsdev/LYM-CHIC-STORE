@@ -41,6 +41,8 @@ interface PaginatedResponse<T> {
 }
 
 const ProductsOverview: React.FC = () => {
+    const dateFormatter = new Intl.DateTimeFormat('es-ES', { timeZone: 'UTC' });
+
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -50,7 +52,6 @@ const ProductsOverview: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
-    
     const [products, setProducts] = useState<Product[]>([]);
 
     // Fetch products from API
@@ -114,7 +115,7 @@ const ProductsOverview: React.FC = () => {
                 image: formData.image || '',
                 featured: Boolean(formData.featured)
             };
-            
+
             await axios.post('/api/admin/products', body);
             setShowAddModal(false);
             await fetchProducts();
@@ -127,7 +128,7 @@ const ProductsOverview: React.FC = () => {
 
     const handleEditProduct = async (formData: Record<string, any>) => {
         if (!selectedProduct) return;
-        
+
         try {
             setIsSubmitting(true);
             const body = {
@@ -140,7 +141,7 @@ const ProductsOverview: React.FC = () => {
                 image: formData.image || '',
                 featured: Boolean(formData.featured)
             };
-            
+
             await axios.put(`/api/admin/products/${selectedProduct.id}`, body);
             setShowEditModal(false);
             await fetchProducts();
@@ -153,7 +154,7 @@ const ProductsOverview: React.FC = () => {
 
     const handleDeleteProduct = async () => {
         if (!selectedProduct) return;
-        
+
         try {
             setIsSubmitting(true);
             await axios.delete(`/api/admin/products/${selectedProduct.id}`);
@@ -207,8 +208,8 @@ const ProductsOverview: React.FC = () => {
                                 </svg>
                             </div>
                         </div>
-                        <button 
-                            className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amaranth-pink-400 to-amaranth-pink-500 hover:from-amaranth-pink-500 hover:to-amaranth-pink-600 text-white px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-medium" 
+                        <button
+                            className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amaranth-pink-400 to-amaranth-pink-500 hover:from-amaranth-pink-500 hover:to-amaranth-pink-600 text-white px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-medium"
                             onClick={() => setShowAddModal(true)}
                         >
                             <PlusIcon className="w-4 h-4" />
@@ -217,7 +218,7 @@ const ProductsOverview: React.FC = () => {
                     </div>
                 </div>
             </div>
-            
+
             {/* Loading state */}
             {loading && (
                 <div className="flex flex-col justify-center items-center py-16 sm:py-20">
@@ -249,10 +250,10 @@ const ProductsOverview: React.FC = () => {
                                         <div key={product.id} className="bg-white border border-davys-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                                             <div className="flex items-start space-x-4">
                                                 <div className="flex-shrink-0">
-                                                    <img 
-                                                        className="h-16 w-16 rounded-lg object-cover border border-davys-gray-200" 
-                                                        src={product.image || '/api/placeholder/64/64'} 
-                                                        alt={product.name} 
+                                                    <img
+                                                        className="h-16 w-16 rounded-lg object-cover border border-davys-gray-200"
+                                                        src={product.image || '/api/placeholder/64/64'}
+                                                        alt={product.name}
                                                     />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -319,10 +320,10 @@ const ProductsOverview: React.FC = () => {
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="flex items-center">
                                                             <div className="flex-shrink-0 h-12 w-12">
-                                                                <img 
-                                                                    className="h-12 w-12 rounded-lg object-cover border border-davys-gray-200" 
-                                                                    src={product.image || '/api/placeholder/48/48'} 
-                                                                    alt={product.name} 
+                                                                <img
+                                                                    className="h-12 w-12 rounded-lg object-cover border border-davys-gray-200"
+                                                                    src={product.image || '/api/placeholder/48/48'}
+                                                                    alt={product.name}
                                                                 />
                                                             </div>
                                                             <div className="ml-4">
@@ -391,10 +392,10 @@ const ProductsOverview: React.FC = () => {
                 fields={[
                     { name: "name", label: "Nombre del Producto", type: "text", required: true },
                     { name: "description", label: "Descripción", type: "textarea", required: true },
-                    { 
-                        name: "categoryId", 
-                        label: "Categoría", 
-                        type: "select", 
+                    {
+                        name: "categoryId",
+                        label: "Categoría",
+                        type: "select",
                         required: true,
                         options: categories.map(cat => ({ value: cat.id, label: cat.name }))
                     },
@@ -427,10 +428,10 @@ const ProductsOverview: React.FC = () => {
                 fields={[
                     { name: "name", label: "Nombre del Producto", type: "text", required: true },
                     { name: "description", label: "Descripción", type: "textarea", required: true },
-                    { 
-                        name: "categoryId", 
-                        label: "Categoría", 
-                        type: "select", 
+                    {
+                        name: "categoryId",
+                        label: "Categoría",
+                        type: "select",
                         required: true,
                         options: categories.map(cat => ({ value: cat.id, label: cat.name }))
                     },
@@ -469,7 +470,7 @@ const ProductsOverview: React.FC = () => {
                     { label: 'Tamaño', value: selectedProduct.size || 'N/A' },
                     { label: 'Color', value: selectedProduct.color || 'N/A' },
                     { label: 'Destacado', value: selectedProduct.featured ? 'Sí' : 'No' },
-                    { label: 'Creado', value: new Date(selectedProduct.createdAt).toLocaleDateString() }
+                    { label: 'Creado', value: dateFormatter.format(new Date(selectedProduct.createdAt)) }
                 ] : []}
             />
         </div>

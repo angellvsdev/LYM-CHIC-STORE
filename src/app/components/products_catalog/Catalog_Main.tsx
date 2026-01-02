@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import NavBar from "../design_lib/navbar";
 import Footer from "../hero_section/credits/Footer";
 import ProductCard from "../design_lib/ProductCard";
@@ -20,7 +20,7 @@ const Catalog_Main = () => {
   const productsPerPage = 10;
 
   // Función para obtener categorías
-  async function fetchCategories() {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await axios.get('/api/categories');
       console.log('Categorías obtenidas:', response.data.data);
@@ -28,10 +28,10 @@ const Catalog_Main = () => {
     } catch (error) {
       console.error("Error obteniendo categorías:", error);
     }
-  }
+  }, []);
 
   // Función para obtener productos
-  async function fetchProducts() {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get('/api/products', {
@@ -58,7 +58,7 @@ const Catalog_Main = () => {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedCategory, searchTerm, currentPage, productsPerPage, priceRange]);
 
   // Función para manejar la búsqueda
   const handleSearch = (term: string) => {
@@ -69,7 +69,7 @@ const Catalog_Main = () => {
   // Cargar categorías al montar el componente
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   // Establecer la primera categoría como seleccionada cuando se cargan las categorías
   useEffect(() => {
@@ -78,20 +78,12 @@ const Catalog_Main = () => {
     }
   }, [categories, selectedCategory]);
 
-  // Cargar productos cuando cambia la categoría seleccionada o el término de búsqueda
-  useEffect(() => {
-    if (selectedCategory) {
-      setCurrentPage(1); // Resetear a la primera página
-      fetchProducts();
-    }
-  }, [selectedCategory, searchTerm, priceRange, fetchProducts]); // Añadir fetchProducts a las dependencias
-
-  // Cargar productos cuando cambia la página
+  // Cargar productos cuando cambian filtros o paginación
   useEffect(() => {
     if (selectedCategory) {
       fetchProducts();
     }
-  }, [currentPage, selectedCategory, fetchProducts]);
+  }, [selectedCategory, fetchProducts]);
 
   return (
     <>
