@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { apiClient } from "@/lib/apiClient";
 import FormModal from "./modals/FormModal";
 import ConfirmModal from "./modals/ConfirmModal";
 
@@ -50,8 +50,7 @@ const CategoriesOverview: React.FC = () => {
       params.set("limit", String(limit));
       if (search) params.set("search", search);
 
-      const { data } = await axios.get(`/api/categories?${params.toString()}`);
-      const payload: { success: boolean; data: PaginatedResponse<Category> } = data;
+      const { data: payload } = await apiClient.get(`/api/categories?${params.toString()}`);
       if (payload?.data) {
         setCategories(payload.data.data);
         setTotal(payload.data.pagination.total);
@@ -93,7 +92,7 @@ const CategoriesOverview: React.FC = () => {
         image: form.image ?? "",
         featured: Boolean(form.featured) ?? false,
       };
-      await axios.post("/api/categories/admin", body);
+      await apiClient.post("/api/categories/admin", body);
       setShowAddModal(false);
       await fetchCategories();
     } catch (e) {
@@ -108,13 +107,12 @@ const CategoriesOverview: React.FC = () => {
     try {
       setIsSubmitting(true);
       const body = {
-        id: selected.id,
         name: form.name,
         description: form.description,
         image: form.image ?? "",
         featured: Boolean(form.featured) ?? false,
       };
-      await axios.put("/api/categories/admin", body);
+      await apiClient.put(`/api/categories/admin?id=${encodeURIComponent(selected.id)}`, body);
       setShowEditModal(false);
       await fetchCategories();
     } catch (e) {
@@ -128,7 +126,7 @@ const CategoriesOverview: React.FC = () => {
     if (!selected) return;
     try {
       setIsSubmitting(true);
-      await axios.delete(`/api/categories/admin`, { data: { id: selected.id } });
+      await apiClient.delete(`/api/categories/admin?id=${encodeURIComponent(selected.id)}`);
       setShowDeleteModal(false);
       await fetchCategories();
     } catch (e) {

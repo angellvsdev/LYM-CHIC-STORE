@@ -18,8 +18,8 @@ const AdminRouteProtection = ({ children }: AdminRouteProtectionProps) => {
         // Usuario no autenticado, redirigir al login
         router.push('/login');
       } else if (user.role !== 'admin') {
-        // Usuario autenticado pero sin permisos de admin, redirigir al home
-        router.push('/');
+        // Usuario autenticado pero sin permisos de admin, redirigir al panel básico
+        router.push('/profile');
       }
     }
   }, [user, isLoading, router]);

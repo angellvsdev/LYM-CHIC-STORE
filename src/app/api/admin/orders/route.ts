@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Order, OrderFilters, PaginatedResponse } from '@/types/admin';
 
+const statusCodeToId: Record<string, number> = {
+    pending: 1,
+    processing: 2,
+    shipped: 3,
+    delivered: 4,
+    cancelled: 5
+};
+
+const statusNameToCode = (statusName: string) => {
+    const normalized = statusName.trim().toLowerCase();
+    const map: Record<string, string> = {
+        'pendiente': 'pending',
+        'en proceso': 'processing',
+        'enviado': 'shipped',
+        'entregado': 'delivered',
+        'cancelado': 'cancelled'
+    };
+    return map[normalized] || normalized;
+};
+
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
@@ -19,15 +39,10 @@ export async function GET(request: NextRequest) {
         const where: any = {};
         
         if (status) {
-            // Map status to order_status_id if needed
-            const statusMap: Record<string, number> = {
-                'received': 1,
-                'preparing': 2,
-                'ready': 3,
-                'picked': 4,
-                'completed': 5
-            };
-            where.order_status_id = statusMap[status] || 1;
+            const orderStatusId = statusCodeToId[status];
+            if (orderStatusId) {
+                where.order_status_id = orderStatusId;
+            }
         }
         
         if (customerName) {
@@ -108,7 +123,7 @@ export async function GET(request: NextRequest) {
                 product: order.order_details[0]?.product.name || 'Producto no disponible',
                 quantity: order.order_details.reduce((sum, detail) => sum + detail.quantity, 0),
                 total: totalAmount,
-                status: order.orderStatus.status_name.toLowerCase() as any,
+                status: statusNameToCode(order.orderStatus.status_name) as any,
                 createdAt: order.order_date.toISOString(),
                 updatedAt: order.order_date.toISOString(), // Default since not in schema
                 notes: undefined, // Not in schema
@@ -159,16 +174,7 @@ export async function PATCH(request: NextRequest) {
             );
         }
 
-        // Validate status and map to order_status_id
-        const statusMap: Record<string, number> = {
-            'received': 1,
-            'preparing': 2,
-            'ready': 3,
-            'picked': 4,
-            'completed': 5
-        };
-        
-        const orderStatusId = statusMap[status];
+        const orderStatusId = statusCodeToId[status];
         if (!orderStatusId) {
             return NextResponse.json(
                 { 
@@ -179,30 +185,42 @@ export async function PATCH(request: NextRequest) {
             );
         }
 
-        // Update order
-        const updatedOrder = await prisma.order.update({
-            where: { order_id: parseInt(orderId) },
-            data: {
-                order_status_id: orderStatusId
-            },
-            include: {
-                user: {
-                    select: {
-                        name: true,
-                        email_address: true,
-                        phone_number: true
-                    }
+        const updatedOrder = await prisma.$transaction(async (tx) => {
+            const updated = await tx.order.update({
+                where: { order_id: parseInt(orderId) },
+                data: {
+                    order_status_id: orderStatusId
                 },
-                orderStatus: {
-                    select: {
-                        status_name: true
+                include: {
+                    user: {
+                        select: {
+                            name: true,
+                            email_address: true,
+                            phone_number: true
+                        }
+                    },
+                    orderStatus: {
+                        select: {
+                            status_name: true
+                        }
                     }
                 }
-            }
+            });
+
+            await tx.orderStatusHistory.create({
+                data: {
+                    order_id: parseInt(orderId),
+                    order_status_id: orderStatusId,
+                    change_date: new Date(),
+                    notes: null
+                }
+            });
+
+            return updated;
         });
 
-        // If order is ready for pickup, send notification
-        if (status === 'ready') {
+        // If order is shipped, send notification
+        if (status === 'shipped') {
             console.log(`Order ${updatedOrder.order_number} ready for pickup. Send WhatsApp to ${updatedOrder.user.phone_number}`);
         }
 

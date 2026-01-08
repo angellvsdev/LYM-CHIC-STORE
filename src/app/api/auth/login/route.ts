@@ -32,7 +32,16 @@ export async function POST(req: NextRequest) {
     }
 
     const response = NextResponse.json(
-      { message: "Login successful" },
+      {
+        user_id: user.user_id,
+        name: user.name,
+        email_address: user.email_address,
+        phone_number: user.phone_number,
+        registration_date: user.registration_date,
+        role: user.role || "user",
+        age: user.age,
+        gender: user.gender,
+      },
       { status: 200 }
     );
 
@@ -47,7 +56,7 @@ export async function POST(req: NextRequest) {
       email_address: user.email_address,
       phone_number: user.phone_number,
       registration_date: user.registration_date,
-      role: user.role,
+      role: user.role || "user",
     };
     await session.save();
 

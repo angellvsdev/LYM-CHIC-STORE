@@ -1,6 +1,5 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { 
     UserIcon,
     EnvelopeIcon,
@@ -9,9 +8,12 @@ import {
     EyeIcon,
     PencilIcon,
     ShoppingBagIcon,
-    PlusIcon
+    PlusIcon,
+    TrashIcon
 } from '@heroicons/react/24/outline';
+import { apiClient } from "@/lib/apiClient";
 import FormModal from './modals/FormModal';
+import ConfirmModal from './modals/ConfirmModal';
 
 interface Customer {
     id: string;
@@ -30,6 +32,7 @@ interface Customer {
 const CustomersOverview: React.FC = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -39,10 +42,8 @@ const CustomersOverview: React.FC = () => {
     const fetchCustomers = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/admin/customers');
-            if (response.data.success) {
-                setCustomers(response.data.data.data);
-            }
+            const { data } = await apiClient.get('/api/admin/customers');
+            if (data.success) setCustomers(data.data.data);
         } catch (error) {
             console.error('Error fetching customers:', error);
         } finally {
@@ -74,7 +75,7 @@ const CustomersOverview: React.FC = () => {
     const handleAddCustomer = async (formData: Record<string, any>) => {
         try {
             setIsSubmitting(true);
-            await axios.post('/api/admin/customers', {
+            await apiClient.post('/api/admin/customers', {
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,
@@ -94,7 +95,7 @@ const CustomersOverview: React.FC = () => {
         if (!selectedCustomer) return;
         try {
             setIsSubmitting(true);
-            await axios.put(`/api/admin/customers/${selectedCustomer.id}`, {
+            await apiClient.put(`/api/admin/customers/${selectedCustomer.id}`, {
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,
@@ -115,6 +116,27 @@ const CustomersOverview: React.FC = () => {
     const openEditModal = (customer: Customer) => {
         setSelectedCustomer(customer);
         setShowEditModal(true);
+    };
+
+    const openDeleteModal = (customer: Customer) => {
+        setSelectedCustomer(customer);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteCustomer = async () => {
+        if (!selectedCustomer) return;
+        try {
+            setIsSubmitting(true);
+            await apiClient.delete(`/api/admin/customers/${selectedCustomer.id}`);
+            setShowDeleteModal(false);
+            setSelectedCustomer(null);
+            await fetchCustomers();
+        } catch (error) {
+            console.error('Error deleting customer:', error);
+            alert(error instanceof Error ? error.message : 'Error al eliminar cliente');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -214,6 +236,13 @@ const CustomersOverview: React.FC = () => {
                                         onClick={() => openEditModal(customer)}
                                     >
                                         <PencilIcon className="w-4 h-4" />
+                                    </button>
+                                    <button 
+                                        className="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+                                        onClick={() => openDeleteModal(customer)}
+                                        title="Eliminar"
+                                    >
+                                        <TrashIcon className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
@@ -315,6 +344,13 @@ const CustomersOverview: React.FC = () => {
                                             >
                                                 <PencilIcon className="w-4 h-4" />
                                             </button>
+                                            <button
+                                                className="text-red-500 hover:text-red-600"
+                                                onClick={() => openDeleteModal(customer)}
+                                                title="Eliminar"
+                                            >
+                                                <TrashIcon className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -325,6 +361,7 @@ const CustomersOverview: React.FC = () => {
             </div>
             </>
             )}
+
 
             {/* Modales */}
             <FormModal
@@ -371,6 +408,20 @@ const CustomersOverview: React.FC = () => {
                         { value: 'other', label: 'Otro' }
                     ]}
                 ]}
+            />
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                }}
+                onConfirm={handleDeleteCustomer}
+                variant="danger"
+                title="Eliminar Cliente"
+                description={`¿Estás seguro de que deseas eliminar a "${selectedCustomer?.name || ''}"? Esta acción no se puede deshacer.`}
+                confirmText="Sí, eliminar"
+                cancelText="Cancelar"
+                isLoading={isSubmitting}
             />
         </div>
     );

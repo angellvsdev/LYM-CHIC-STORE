@@ -1,10 +1,12 @@
 'use client';
 import React, { useState } from 'react';
+import { useAuth } from '../../../hooks/useAuth';
 import { 
     MagnifyingGlassIcon,
     BellIcon,
     Bars3Icon,
-    UserCircleIcon
+    UserCircleIcon,
+    ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 interface AdminHeaderProps {
@@ -14,6 +16,7 @@ interface AdminHeaderProps {
 
 const AdminHeader: React.FC<AdminHeaderProps> = ({ isSidebarOpen, setIsSidebarOpen }) => {
     const [searchQuery, setSearchQuery] = useState('');
+    const { logout } = useAuth();
     const [notifications] = useState([
         { id: 1, message: 'Nuevo pedido recibido: PED-2024-0015', time: '2 min ago', read: false },
         { id: 2, message: 'Producto "Set de Tazas" agotado', time: '1 hora ago', read: false },
@@ -23,7 +26,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ isSidebarOpen, setIsSidebarOp
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-70 bg-white/90 backdrop-blur border-b border-davys-gray-200">
+        <header className="relative top-0 left-0 right-0 z-70 bg-white/90 backdrop-blur border-b border-davys-gray-200 w-full">
             <div className="px-4 sm:px-6 py-3 sm:py-4">
                 <div className="flex items-center justify-between">
                     {/* Botón de menú y búsqueda */}
@@ -53,21 +56,22 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ isSidebarOpen, setIsSidebarOp
                     {/* Notificaciones y perfil */}
                     <div className="flex items-center space-x-2 sm:space-x-4">
                         {/* Notificaciones */}
-                        <div className="relative">
-                            <button className="p-2 rounded-lg hover:bg-davys-gray-100 transition-colors relative">
-                                <BellIcon className="w-5 h-5 sm:w-6 sm:h-6 text-davys-gray-600" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-amaranth-pink-400 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </button>
-                        </div>
+                        
+
+                        <button
+                            type="button"
+                            onClick={logout}
+                            className="p-2 rounded-lg hover:bg-davys-gray-100 transition-colors"
+                            aria-label="Cerrar sesión"
+                            title="Cerrar sesión"
+                        >
+                            <ArrowRightOnRectangleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-davys-gray-600" />
+                        </button>
 
                         {/* Perfil de usuario */}
                         <div className="flex items-center space-x-2 sm:space-x-3">
                             <div className="text-right hidden md:block">
-                                <p className="text-sm font-medium text-davys-gray-100">Administrador</p>
+                                <p className="text-sm font-medium text-davys-gray-100">Perfil de Administración</p>
                                 <p className="text-xs text-davys-gray-600">admin@lym.com</p>
                             </div>
                             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-amaranth-pink-400 to-pink-lavender-400 rounded-full flex items-center justify-center">

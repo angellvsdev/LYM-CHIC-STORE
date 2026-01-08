@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+const statusNameToCode = (statusName: string) => {
+    const normalized = statusName.trim().toLowerCase();
+    const map: Record<string, string> = {
+        'pendiente': 'pending',
+        'en proceso': 'processing',
+        'enviado': 'shipped',
+        'entregado': 'delivered',
+        'cancelado': 'cancelled'
+    };
+    return map[normalized] || normalized;
+};
+
 export async function GET(
     request: NextRequest,
     { params }: { params: { id: string } }
@@ -86,14 +98,14 @@ export async function GET(
                 total: detail.quantity * parseFloat(detail.unit_price.toString())
             })),
             total: totalAmount,
-            status: order.orderStatus.status_name.toLowerCase(),
+            status: statusNameToCode(order.orderStatus.status_name),
             deliveryMethod: order.delivery_method.toLowerCase(),
             address: undefined, // Not in schema
             notes: undefined, // Not in schema
             createdAt: order.order_date.toISOString(),
             updatedAt: order.order_date.toISOString(), // Default since not in schema
             statusHistory: order.orderStatusHistory.map(history => ({
-                status: history.orderStatus.status_name.toLowerCase(),
+                status: statusNameToCode(history.orderStatus.status_name),
                 createdAt: history.change_date.toISOString(),
                 notes: history.notes
             }))
@@ -146,8 +158,9 @@ export async function DELETE(
         }
 
         // Only allow deleting orders with specific status
-        const allowedStatuses = ['cancelled', 'draft', 'received'];
-        if (!allowedStatuses.includes(order.orderStatus.status_name.toLowerCase())) {
+        const orderStatusCode = statusNameToCode(order.orderStatus.status_name);
+        const allowedStatuses = ['cancelled', 'pending'];
+        if (!allowedStatuses.includes(orderStatusCode)) {
             return NextResponse.json(
                 { 
                     success: false, 

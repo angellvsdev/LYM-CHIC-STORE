@@ -161,6 +161,23 @@ export async function DELETE(
             );
         }
 
+        // Prevent deleting products referenced by orders
+        const referencedCount = await prisma.orderDetail.count({
+            where: {
+                product_id: params.id
+            }
+        });
+
+        if (referencedCount > 0) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Cannot delete product because it is referenced by existing orders'
+                },
+                { status: 400 }
+            );
+        }
+
         // Delete product
         await prisma.product.delete({
             where: {

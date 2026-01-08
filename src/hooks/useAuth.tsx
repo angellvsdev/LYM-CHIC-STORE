@@ -33,14 +33,35 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Simular carga inicial de sesión desde localStorage o API
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Por ahora, simulamos con localStorage
+        setIsLoading(true);
+        // Intentar restaurar sesión real desde el servidor (iron-session)
+        const response = await fetch('/api/auth/me', { method: 'GET' });
+        if (response.ok) {
+          const data = await response.json();
+          const sessionUser = data?.user;
+          if (sessionUser) {
+            const restoredUser: User = {
+              id: sessionUser.user_id?.toString() || '1',
+              name: sessionUser.name || 'Usuario',
+              email: sessionUser.email_address || '',
+              role: sessionUser.role === 'admin' ? 'admin' : 'user',
+              phone_number: sessionUser.phone_number,
+              registration_date: sessionUser.registration_date,
+            };
+            setUser(restoredUser);
+            localStorage.setItem('user', JSON.stringify(restoredUser));
+            return;
+          }
+        }
+
+        // Fallback: localStorage
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
           setUser(JSON.parse(savedUser));
@@ -81,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           id: userData.user_id?.toString() || '1',
           name: userData.name || 'Usuario',
           email: email,
-          role: userData.role || 'user', // Por defecto usuario básico
+          role: userData.role === 'admin' ? 'admin' : 'user',
           phone_number: userData.phone_number,
           age: userData.age,
           gender: userData.gender,
@@ -95,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (loggedUser.role === 'admin') {
           window.location.href = '/admin';
         } else {
-          window.location.href = '/';
+          window.location.href = '/profile';
         }
 
         return true;
@@ -113,6 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    fetch('/api/auth/logout', { method: 'POST' }).catch(() => undefined);
     setUser(null);
     localStorage.removeItem('user');
     setError(null);

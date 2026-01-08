@@ -51,11 +51,14 @@ export async function POST(req: NextRequest) {
       data: validatedData,
     });
 
-    return NextResponse.json(category, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: category, message: "Category created" },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating category:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { success: false, error: "Internal Server Error" },
       { status: 500 }
     );
   }
@@ -105,11 +108,11 @@ export async function PUT(req: NextRequest) {
       data: validatedData,
     });
 
-    return NextResponse.json(category);
+    return NextResponse.json({ success: true, data: category, message: "Category updated" });
   } catch (error) {
     console.error("Error updating category:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { success: false, error: "Internal Server Error" },
       { status: 500 }
     );
   }
@@ -140,17 +143,31 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    const referencedProducts = await prisma.product.count({
+      where: { categoryId },
+    });
+
+    if (referencedProducts > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Cannot delete category with existing products",
+        },
+        { status: 400 }
+      );
+    }
+
     await prisma.category.delete({
       where: {
         id: categoryId,
       },
     });
 
-    return new NextResponse(null, { status: 204 });
+    return NextResponse.json({ success: true, message: "Category deleted" }, { status: 200 });
   } catch (error) {
     console.error("Error deleting category:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { success: false, error: "Internal Server Error" },
       { status: 500 }
     );
   }

@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
-import { useRouter } from "next/navigation";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +10,6 @@ const Login = () => {
   });
   const [rememberMe, setRememberMe] = useState(false);
   const { login, isLoading, error } = useAuth();
-  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,10 +27,7 @@ const Login = () => {
     }
 
     const success = await login(formData.email, formData.password);
-
-    if (success) {
-      router.push('/');
-    }
+    void success;
   };
 
   return (

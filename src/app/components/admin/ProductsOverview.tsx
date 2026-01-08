@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
+import { apiClient } from "@/lib/apiClient";
 import FormModal from "./modals/FormModal";
 import ConfirmModal from "./modals/ConfirmModal";
 import DetailModal from "./modals/DetailModal";
@@ -61,10 +61,8 @@ const ProductsOverview: React.FC = () => {
             if (categoryId) {
                 url += `?category=${categoryId}`;
             }
-            const response = await axios.get(url);
-            if (response.data.success) {
-                setProducts(response.data.data.data);
-            }
+            const { data } = await apiClient.get(url);
+            if (data.success) setProducts(data.data.data);
         } catch (error) {
         } finally {
             setLoading(false);
@@ -74,10 +72,8 @@ const ProductsOverview: React.FC = () => {
     // Fetch categories from API
     const fetchCategories = async () => {
         try {
-            const response = await axios.get('/api/categories');
-            if (response.data.success && response.data.data.data) {
-                setCategories(response.data.data.data);
-            }
+            const { data } = await apiClient.get('/api/categories');
+            if (data.success && data.data?.data) setCategories(data.data.data);
         } catch (error) {
             console.error('Error fetching categories:', error);
         }
@@ -114,11 +110,12 @@ const ProductsOverview: React.FC = () => {
                 featured: Boolean(formData.featured)
             };
             
-            await axios.post('/api/admin/products', body);
+            await apiClient.post('/api/admin/products', body);
             setShowAddModal(false);
             await fetchProducts();
         } catch (error) {
             console.error('Error creating product:', error);
+            alert(error instanceof Error ? error.message : 'Error al crear producto');
         } finally {
             setIsSubmitting(false);
         }
@@ -140,11 +137,12 @@ const ProductsOverview: React.FC = () => {
                 featured: Boolean(formData.featured)
             };
             
-            await axios.put(`/api/admin/products/${selectedProduct.id}`, body);
+            await apiClient.put(`/api/admin/products/${selectedProduct.id}`, body);
             setShowEditModal(false);
             await fetchProducts();
         } catch (error) {
             console.error('Error updating product:', error);
+            alert(error instanceof Error ? error.message : 'Error al actualizar producto');
         } finally {
             setIsSubmitting(false);
         }
@@ -155,11 +153,12 @@ const ProductsOverview: React.FC = () => {
         
         try {
             setIsSubmitting(true);
-            await axios.delete(`/api/admin/products/${selectedProduct.id}`);
+            await apiClient.delete(`/api/admin/products/${selectedProduct.id}`);
             setShowDeleteModal(false);
             await fetchProducts();
         } catch (error) {
             console.error('Error deleting product:', error);
+            alert(error instanceof Error ? error.message : 'Error al eliminar producto');
         } finally {
             setIsSubmitting(false);
         }

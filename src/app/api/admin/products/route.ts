@@ -122,11 +122,42 @@ export async function POST(request: NextRequest) {
         } = body;
 
         // Basic validations
-        if (!name || !description || !categoryId || !price) {
+        const hasName = typeof name === 'string' && name.trim().length > 0;
+        const hasDescription = typeof description === 'string' && description.trim().length > 0;
+        const hasCategoryId = typeof categoryId === 'string' && categoryId.trim().length > 0;
+        const hasPrice = price !== undefined && price !== null && `${price}`.trim().length > 0;
+
+        if (!hasName || !hasDescription || !hasCategoryId || !hasPrice) {
             return NextResponse.json(
                 { 
                     success: false, 
                     error: 'All required fields must be present' 
+                },
+                { status: 400 }
+            );
+        }
+
+        const parsedPrice = typeof price === 'number' ? price : parseFloat(price);
+        if (!Number.isFinite(parsedPrice)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Invalid price'
+                },
+                { status: 400 }
+            );
+        }
+
+        const categoryExists = await prisma.category.findUnique({
+            where: { id: categoryId },
+            select: { id: true }
+        });
+
+        if (!categoryExists) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Category not found'
                 },
                 { status: 400 }
             );
@@ -138,7 +169,7 @@ export async function POST(request: NextRequest) {
                 name,
                 description,
                 categoryId,
-                price: parseFloat(price),
+                price: parsedPrice,
                 size: size || null,
                 color: color || null,
                 image: image || '',

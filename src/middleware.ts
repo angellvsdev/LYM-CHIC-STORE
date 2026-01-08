@@ -11,15 +11,20 @@ declare module "iron-session" {
 }
 
 export async function middleware(request: NextRequest) {
-  // Solo aplicar el middleware a las rutas de la API
-  if (!request.nextUrl.pathname.startsWith("/api")) {
+  const pathname = request.nextUrl.pathname;
+  const isApiRoute = pathname.startsWith("/api");
+  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+  const isAdminApiRoute = pathname.startsWith("/api/admin/") || pathname.includes("/api/") && pathname.includes("/admin");
+
+  // Solo manejar rutas /api y /admin
+  if (!isApiRoute && !isAdminRoute) {
     return NextResponse.next();
   }
 
   // Excluir rutas públicas
   if (
-    request.nextUrl.pathname === "/api/auth/login" ||
-    request.nextUrl.pathname === "/api/auth/register"
+    pathname === "/api/auth/login" ||
+    pathname === "/api/auth/register"
   ) {
     return NextResponse.next();
   }
@@ -32,6 +37,33 @@ export async function middleware(request: NextRequest) {
       sessionOptions
     );
 
+    // Proteger rutas de admin en servidor
+    if (isAdminRoute || isAdminApiRoute) {
+      if (!session.user) {
+        if (isAdminApiRoute) {
+          return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
+            status: 401,
+          });
+        }
+        const url = request.nextUrl.clone();
+        url.pathname = "/login";
+        return NextResponse.redirect(url);
+      }
+
+      if ((session.user.role || "user") !== "admin") {
+        if (isAdminApiRoute) {
+          return new NextResponse(JSON.stringify({ message: "Forbidden" }), {
+            status: 403,
+          });
+        }
+        const url = request.nextUrl.clone();
+        url.pathname = "/profile";
+        return NextResponse.redirect(url);
+      }
+
+      return response;
+    }
+
     // if (!session.user) {
     //   return new NextResponse(JSON.stringify({ message: "Unauthorized" }), {
     //     status: 401,
@@ -39,7 +71,7 @@ export async function middleware(request: NextRequest) {
     // }
 
     // Verificar roles para rutas específicas
-    if (request.nextUrl.pathname.startsWith("/api/orders")) {
+    if (pathname.startsWith("/api/orders")) {
       // Asegurar que el usuario tenga el rol correcto
       if (session.user && !session.user.role) {
         session.user.role = "user";
@@ -58,5 +90,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/api/:path*",
+  matcher: ["/api/:path*", "/admin", "/admin/:path*"],
 };

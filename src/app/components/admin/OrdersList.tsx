@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { 
     EyeIcon,
     PencilIcon,
@@ -9,8 +8,10 @@ import {
     ClockIcon,
     ExclamationTriangleIcon,
     UsersIcon,
-    PlusIcon
+    PlusIcon,
+    TrashIcon
 } from '@heroicons/react/24/outline';
+import { apiClient } from "@/lib/apiClient";
 import FormModal from './modals/FormModal';
 import ConfirmModal from './modals/ConfirmModal';
 import DetailModal from './modals/DetailModal';
@@ -25,7 +26,7 @@ interface Order {
     product: string;
     quantity: number;
     total: number;
-    status: 'received' | 'preparing' | 'ready' | 'picked' | 'completed';
+    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
     createdAt: string;
     updatedAt: string;
     notes?: string;
@@ -48,6 +49,7 @@ const OrdersList: React.FC = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -60,10 +62,8 @@ const OrdersList: React.FC = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/admin/orders');
-            if (response.data.success) {
-                setOrders(response.data.data.data);
-            }
+            const { data } = await apiClient.get('/api/admin/orders');
+            if (data.success) setOrders(data.data.data);
         } catch (error) {
             console.error('Error fetching orders:', error);
         } finally {
@@ -74,10 +74,8 @@ const OrdersList: React.FC = () => {
     // Fetch customers for order creation
     const fetchCustomers = async () => {
         try {
-            const response = await axios.get('/api/admin/customers');
-            if (response.data.success) {
-                setCustomers(response.data.data.data);
-            }
+            const { data } = await apiClient.get('/api/admin/customers');
+            if (data.success) setCustomers(data.data.data);
         } catch (error) {
             console.error('Error fetching customers:', error);
         }
@@ -86,10 +84,8 @@ const OrdersList: React.FC = () => {
     // Fetch products for order creation
     const fetchProducts = async () => {
         try {
-            const response = await axios.get('/api/admin/products');
-            if (response.data.success) {
-                setProducts(response.data.data.data);
-            }
+            const { data } = await apiClient.get('/api/admin/products');
+            if (data.success) setProducts(data.data.data);
         } catch (error) {
             console.error('Error fetching products:', error);
         }
@@ -103,33 +99,33 @@ const OrdersList: React.FC = () => {
 
     const getStatusInfo = (status: Order['status']) => {
         switch (status) {
-            case 'received':
+            case 'pending':
                 return { 
-                    label: 'Recibido', 
+                    label: 'Pendiente', 
                     color: 'bg-blue-100 text-blue-800',
                     icon: ClockIcon
                 };
-            case 'preparing':
+            case 'processing':
                 return { 
-                    label: 'Preparando', 
+                    label: 'En proceso', 
                     color: 'bg-yellow-100 text-yellow-800',
                     icon: ExclamationTriangleIcon
                 };
-            case 'ready':
+            case 'shipped':
                 return { 
-                    label: 'Listo', 
+                    label: 'Enviado', 
                     color: 'bg-green-100 text-green-800',
                     icon: CheckCircleIcon
                 };
-            case 'picked':
+            case 'delivered':
                 return { 
-                    label: 'Recogido', 
+                    label: 'Entregado', 
                     color: 'bg-purple-100 text-purple-800',
                     icon: UsersIcon
                 };
-            case 'completed':
+            case 'cancelled':
                 return { 
-                    label: 'Completado', 
+                    label: 'Cancelado', 
                     color: 'bg-gray-100 text-gray-800',
                     icon: CheckCircleIcon
                 };
@@ -155,8 +151,8 @@ const OrdersList: React.FC = () => {
                     unit_price: selectedProduct?.price || 0
                 }]
             };
-            
-            await axios.post('/api/admin/orders', body);
+
+            await apiClient.post('/api/admin/orders', body);
             setShowAddModal(false);
             await fetchOrders();
         } catch (error) {
@@ -175,8 +171,8 @@ const OrdersList: React.FC = () => {
                 orderId: selectedOrder.id,
                 status: formData.status
             };
-            
-            await axios.patch('/api/admin/orders', body);
+
+            await apiClient.patch('/api/admin/orders', body);
             setShowStatusModal(false);
             await fetchOrders();
         } catch (error) {
@@ -194,6 +190,27 @@ const OrdersList: React.FC = () => {
     const openDetailModal = (order: Order) => {
         setSelectedOrder(order);
         setShowDetailModal(true);
+    };
+
+    const openDeleteModal = (order: Order) => {
+        setSelectedOrder(order);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteOrder = async () => {
+        if (!selectedOrder) return;
+        try {
+            setIsSubmitting(true);
+            await apiClient.delete(`/api/admin/orders/${selectedOrder.id}`);
+            setShowDeleteModal(false);
+            setSelectedOrder(null);
+            await fetchOrders();
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            alert(error instanceof Error ? error.message : 'Error al eliminar pedido');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -274,6 +291,13 @@ const OrdersList: React.FC = () => {
                                                     >
                                                         <PencilIcon className="w-4 h-4 text-davys-gray-600" />
                                                     </button>
+                                                    <button
+                                                        className="p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                                        onClick={() => openDeleteModal(order)}
+                                                        title="Eliminar"
+                                                    >
+                                                        <TrashIcon className="w-4 h-4 text-red-500" />
+                                                    </button>
                                                 </div>
                                             </div>
                                             <div className="mt-2 text-xs text-davys-gray-500">
@@ -330,6 +354,13 @@ const OrdersList: React.FC = () => {
                                                     >
                                                         <PencilIcon className="w-5 h-5 text-davys-gray-600" />
                                                     </button>
+                                                    <button
+                                                        className="p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                                        onClick={() => openDeleteModal(order)}
+                                                        title="Eliminar"
+                                                    >
+                                                        <TrashIcon className="w-5 h-5 text-red-500" />
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -340,6 +371,18 @@ const OrdersList: React.FC = () => {
                     )}
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteOrder}
+                variant="danger"
+                title="Eliminar Pedido"
+                description={`¿Estás seguro de que deseas eliminar el pedido "${selectedOrder?.orderNumber || ''}"? Esta acción no se puede deshacer.`}
+                confirmText="Sí, eliminar"
+                cancelText="Cancelar"
+                isLoading={isSubmitting}
+            />
 
             {/* Add Order Modal */}
             <FormModal
@@ -400,11 +443,11 @@ const OrdersList: React.FC = () => {
                         type: "select", 
                         required: true,
                         options: [
-                            { value: "received", label: "Recibido" },
-                            { value: "preparing", label: "Preparando" },
-                            { value: "ready", label: "Listo" },
-                            { value: "picked", label: "Recogido" },
-                            { value: "completed", label: "Completado" }
+                            { value: "pending", label: "Pendiente" },
+                            { value: "processing", label: "En proceso" },
+                            { value: "shipped", label: "Enviado" },
+                            { value: "delivered", label: "Entregado" },
+                            { value: "cancelled", label: "Cancelado" }
                         ]
                     }
                 ]}

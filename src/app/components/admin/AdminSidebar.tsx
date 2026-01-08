@@ -28,9 +28,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         { id: 'orders', label: 'Pedidos', icon: ShoppingBagIcon },
         { id: 'products', label: 'Productos', icon: DocumentTextIcon },
         { id: 'categories', label: 'Categorías', icon: DocumentTextIcon },
-        { id: 'customers', label: 'Clientes', icon: UsersIcon },
-        { id: 'content', label: 'Contenido', icon: DocumentTextIcon },
-        { id: 'settings', label: 'Configuración', icon: Cog6ToothIcon },
+        { id: 'customers', label: 'Clientes', icon: UsersIcon }
     ];
 
     return (
