@@ -107,7 +107,8 @@ const ProductsOverview: React.FC = () => {
                 size: formData.size || null,
                 color: formData.color || null,
                 image: formData.image || '',
-                featured: Boolean(formData.featured)
+                featured: Boolean(formData.featured),
+                stock: parseInt(formData.stock) || 0  // ← AÑADIR ESTA LÍNEA
             };
             
             await apiClient.post('/api/admin/products', body);
@@ -134,7 +135,8 @@ const ProductsOverview: React.FC = () => {
                 size: formData.size || null,
                 color: formData.color || null,
                 image: formData.image || '',
-                featured: Boolean(formData.featured)
+                featured: Boolean(formData.featured),
+                stock: parseInt(formData.stock) || 0  // ← AÑADIR ESTA LÍNEA
             };
             
             await apiClient.put(`/api/admin/products/${selectedProduct.id}`, body);
@@ -397,6 +399,7 @@ const ProductsOverview: React.FC = () => {
                         options: categories.map(cat => ({ value: cat.id, label: cat.name }))
                     },
                     { name: "price", label: "Precio ($)", type: "number", required: true },
+                    { name: "stock", label: "Stock", type: "number", required: true },  // ← AÑADIR ESTA LÍNEA
                     { name: "size", label: "Tamaño", type: "text" },
                     { name: "color", label: "Color", type: "text" },
                     { name: "image", label: "URL de Imagen", type: "text" },
@@ -433,6 +436,7 @@ const ProductsOverview: React.FC = () => {
                         options: categories.map(cat => ({ value: cat.id, label: cat.name }))
                     },
                     { name: "price", label: "Precio ($)", type: "number", required: true },
+                    { name: "stock", label: "Stock", type: "number", required: true },  // ← AÑADIR ESTA LÍNEA
                     { name: "size", label: "Tamaño", type: "text" },
                     { name: "color", label: "Color", type: "text" },
                     { name: "image", label: "URL de Imagen", type: "text" },

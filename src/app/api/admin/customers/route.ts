@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Customer, CustomerFilters, PaginatedResponse } from '@/types/admin';
+import { hashPassword, generateSecurePassword } from '@/lib/auth/password';
+import { z } from 'zod';
+
+// Esquema de validación para la creación de usuarios
+const createUserSchema = z.object({
+  name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+  email: z.string().email('Correo electrónico inválido'),
+  phone: z.string().min(8, 'El teléfono debe tener al menos 8 dígitos'),
+  password: z
+    .string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      'La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial'
+    )
+    .optional(),
+  role: z.enum(['user', 'admin']).default('user'),
+  age: z.number().int().positive().optional(),
+  gender: z.string().optional(),
+});
 
 export async function GET(request: NextRequest) {
     try {
@@ -136,20 +156,24 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { name, email, phone, password } = body;
-
-        // Validaciones básicas
-        if (!name || !email || !phone) {
+        
+        // Validar el cuerpo de la solicitud
+        const validation = createUserSchema.safeParse(body);
+        
+        if (!validation.success) {
             return NextResponse.json(
                 { 
                     success: false, 
-                    error: 'Nombre, email y teléfono son requeridos' 
+                    error: 'Datos de entrada inválidos',
+                    details: validation.error.errors 
                 },
                 { status: 400 }
             );
         }
+        
+        const { name, email, phone, password, role, age, gender } = validation.data;
 
-        // Verificar si el email ya existe (usando campo correcto)
+        // Verificar si el email ya existe
         const existingCustomer = await prisma.user.findUnique({
             where: { email_address: email }
         });
@@ -164,18 +188,40 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Crear cliente usando campos correctos del schema
+        // Generar contraseña segura si no se proporciona
+        const plainPassword = password || generateSecurePassword(12);
+        
+        // Hashear la contraseña
+        const hashedPassword = await hashPassword(plainPassword);
+
+        // Crear el usuario con la contraseña hasheada
         const customer = await prisma.user.create({
             data: {
                 name,
                 email_address: email,
                 phone_number: phone,
-                password: password || 'changeme', // Requerido por schema
+                password: hashedPassword,
                 registration_date: new Date(),
-                role: 'user'
+                role,
+                age,
+                gender
+                // Nota: No incluimos email_verified ya que no existe en el modelo
+            },
+            select: {
+                user_id: true,
+                name: true,
+                email_address: true,
+                phone_number: true,
+                registration_date: true,
+                role: true,
+                age: true,
+                gender: true
             }
         });
 
+        // En producción, aquí podrías enviar un correo con la contraseña temporal
+        // o un enlace para establecer una contraseña
+        
         return NextResponse.json({
             success: true,
             data: {
@@ -183,9 +229,16 @@ export async function POST(request: NextRequest) {
                 name: customer.name,
                 email: customer.email_address,
                 phone: customer.phone_number,
-                registeredAt: customer.registration_date.toISOString().split('T')[0]
+                registeredAt: customer.registration_date.toISOString().split('T')[0],
+                role: customer.role,
+                // En producción, nunca devolvemos la contraseña
+                // Solo en desarrollo y solo si no se proporcionó una contraseña
+                ...(process.env.NODE_ENV === 'development' && !password ? { 
+                    temporaryPassword: plainPassword,
+                    note: 'Esta contraseña solo se muestra en desarrollo. En producción, implementa un flujo de verificación por correo.' 
+                } : {})
             },
-            message: 'Cliente creado correctamente'
+            message: 'Usuario creado correctamente' + (!password ? ' con una contraseña temporal' : '')
         });
 
     } catch (error) {

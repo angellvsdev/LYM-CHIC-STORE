@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { compare } from "bcrypt";
+import { hashPassword } from "@/lib/auth/password";
 import { LoginUserSchema } from "@/lib/utils/validation/schemas";
 import { createError } from "@/lib/utils/api/error";
 import { getIronSession, IronSessionData } from "iron-session";
@@ -25,7 +26,31 @@ export async function POST(req: NextRequest) {
       throw createError("Invalid credentials", 401, "INVALID_CREDENTIALS");
     }
 
-    const isValid = await compare(validatedData.password, user.password);
+    // Verificar si la contraseña está hasheada (comienza con $2a$, $2b$ o $2y$)
+    const isBcryptHash = user.password.startsWith('$2a$') || 
+                        user.password.startsWith('$2b$') || 
+                        user.password.startsWith('$2y$');
+    
+    let isValid = false;
+    
+    if (isBcryptHash) {
+      // Verificar contraseña hasheada
+      isValid = await compare(validatedData.password, user.password);
+    } else {
+      // Para compatibilidad con contraseñas en texto plano (solo durante migración)
+      console.warn(`⚠️  Usuario ${user.email_address} tiene contraseña en texto plano - Debe ser actualizado`);
+      isValid = validatedData.password === user.password;
+      
+      // Si la contraseña es correcta pero está en texto plano, actualizarla a hash
+      if (isValid) {
+        const hashedPassword = await hashPassword(validatedData.password);
+        await prisma.user.update({
+          where: { user_id: user.user_id },
+          data: { password: hashedPassword }
+        });
+        console.log(`✅ Contraseña actualizada a hash para ${user.email_address}`);
+      }
+    }
 
     if (!isValid) {
       throw createError("Invalid credentials", 401, "INVALID_CREDENTIALS");

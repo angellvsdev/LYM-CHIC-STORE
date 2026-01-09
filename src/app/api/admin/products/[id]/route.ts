@@ -40,7 +40,7 @@ export async function GET(
                 name: product.category.name
             },
             price: product.price,
-            stock: 0, // Default since not in schema
+            stock: product.stock || 0,
             status: 'active' as const,
             image: product.image || '',
             images: [product.image || ''],
@@ -82,7 +82,8 @@ export async function PUT(
             size,
             color,
             image,
-            featured
+            featured,
+            stock
         } = body;
 
         // Basic validations
@@ -109,7 +110,8 @@ export async function PUT(
                 size: size || null,
                 color: color || null,
                 image: image || '',
-                featured: Boolean(featured)
+                featured: Boolean(featured),
+                stock: stock || 0
             },
             include: {
                 category: {

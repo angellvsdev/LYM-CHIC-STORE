@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import AdminHeader from '../components/admin/AdminHeader';
 import DashboardStats from '../components/admin/DashboardStats';
@@ -8,29 +8,54 @@ import ProductsOverview from '../components/admin/ProductsOverview';
 import CustomersOverview from '../components/admin/CustomersOverview';
 import CategoriesOverview from '../components/admin/CategoriesOverview';
 import AdminRouteProtection from '../components/admin/AdminRouteProtection';
+import { apiClient } from '@/lib/apiClient';
 
 export default function AdminPage() {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [dashboardData, setDashboardData] = useState({
+        totalOrders: 0,
+        pendingOrders: 0,
+        totalRevenue: 0,
+        totalProducts: 0,
+        totalCustomers: 0,
+        averageOrderValue: 0
+    });
+    const [loading, setLoading] = useState(true);
 
-    // Datos de ejemplo para el dashboard
-    const dashboardData = {
-        totalOrders: 156,
-        pendingOrders: 23,
-        totalRevenue: 28450.75,
-        totalProducts: 89,
-        totalCustomers: 342,
-        averageOrderValue: 182.37
+    // Fetch dashboard data from API
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            const { data } = await apiClient.get('/api/admin/dashboard');
+            if (data.success) {
+                setDashboardData(data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
 
     const renderMainContent = () => {
         switch (activeSection) {
             case 'dashboard':
                 return (
                     <div className="space-y-6">
-                        <DashboardStats data={dashboardData} />
+                        {loading ? (
+                            <div className="flex justify-center items-center py-12">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amaranth-pink-400"></div>
+                            </div>
+                        ) : (
+                            <DashboardStats data={dashboardData} />
+                        )}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <OrdersList />
+                            <OrdersList recentOnly={true} />
                             <ProductsOverview />
                         </div>
                     </div>
@@ -65,6 +90,7 @@ export default function AdminPage() {
                     <AdminHeader
                         isSidebarOpen={isSidebarOpen}
                         setIsSidebarOpen={setIsSidebarOpen}
+                        onNavigate={setActiveSection}
                     />
                     <main className="p-6">
                         {renderMainContent()}

@@ -38,9 +38,12 @@ model Product {
   size         String?
   color        String?
   featured     Boolean?
+  stock        Int           @default(0)
   categoryId   String
   orderDetails OrderDetail[]
   category     Category      @relation(fields: [categoryId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Order {

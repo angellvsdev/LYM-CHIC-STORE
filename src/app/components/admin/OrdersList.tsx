@@ -44,7 +44,11 @@ interface PaginatedResponse<T> {
     };
 }
 
-const OrdersList: React.FC = () => {
+interface OrdersListProps {
+    recentOnly?: boolean;
+}
+
+const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
@@ -62,7 +66,8 @@ const OrdersList: React.FC = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const { data } = await apiClient.get('/api/admin/orders');
+            const queryParams = recentOnly ? '?recent=true' : '';
+            const { data } = await apiClient.get(`/api/admin/orders${queryParams}`);
             if (data.success) setOrders(data.data.data);
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -95,7 +100,7 @@ const OrdersList: React.FC = () => {
         fetchOrders();
         fetchCustomers();
         fetchProducts();
-    }, []);
+    }, [recentOnly]);
 
     const getStatusInfo = (status: Order['status']) => {
         switch (status) {

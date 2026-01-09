@@ -96,6 +96,7 @@ const SignUp = () => {
         age: parseInt(formData.age),
         email_address: formData.email_address,
         password: formData.password,
+        confirmPassword: formData.confirmPassword, // Add confirmPassword to the request
         phone_number: formData.phone_number,
       });
 

@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         const orderNumber = searchParams.get('orderNumber');
         const dateFrom = searchParams.get('dateFrom');
         const dateTo = searchParams.get('dateTo');
+        const recent = searchParams.get('recent'); // New parameter for recent orders
 
         const skip = (page - 1) * limit;
 
@@ -61,7 +62,13 @@ export async function GET(request: NextRequest) {
             };
         }
         
-        if (dateFrom || dateTo) {
+        if (recent === 'true') {
+            // Filter for orders from the last week
+            const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            where.order_date = {
+                gte: oneWeekAgo
+            };
+        } else if (dateFrom || dateTo) {
             where.order_date = {};
             if (dateFrom) {
                 where.order_date.gte = new Date(dateFrom);
