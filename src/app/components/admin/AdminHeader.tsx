@@ -274,7 +274,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ isSidebarOpen, setIsSidebarOp
     }, []);
 
     return (
-        <header className="relative top-0 left-0 right-0 z-70 bg-white/90 backdrop-blur border-b border-davys-gray-200 w-full">
+        <header className="relative top-0 left-0 right-0 z-70 backdrop-blur w-vw">
             <div className="px-4 sm:px-6 py-3 sm:py-4">
                 <div className="flex items-center justify-between">
                     {/* Botón de menú y búsqueda */}

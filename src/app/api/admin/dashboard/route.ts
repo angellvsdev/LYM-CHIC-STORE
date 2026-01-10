@@ -20,10 +20,10 @@ export async function GET(request: NextRequest) {
 
         // Get order statuses to filter correctly
         const orderStatuses = await prisma.orderStatus.findMany();
-        const pendingStatusNames = ['pending', 'received', 'preparing', 'ready'];
-        const completedStatusNames = ['delivered', 'completed'];
-        const cancelledStatusNames = ['cancelled'];
-        const shippedStatusNames = ['shipped', 'enviado'];
+        const pendingStatusNames = ['pendiente', 'en proceso']; // Estados en español como están en la BD
+        const completedStatusNames = ['entregado'];
+        const cancelledStatusNames = ['cancelado'];
+        const shippedStatusNames = ['enviado'];
 
         const pendingStatusIds = orderStatuses
             .filter(status => pendingStatusNames.includes(status.status_name.toLowerCase()))
@@ -47,9 +47,10 @@ export async function GET(request: NextRequest) {
             pendingOrders,
             totalProducts,
             totalCustomers,
-            completedOrdersRevenue,
-            inProcessOrdersRevenue,
-            shippedOrdersRevenue,
+            completedOrderDetails,
+            shippedOrderDetails,
+            completedOrdersCount,
+            shippedOrdersCount,
             recentOrders
         ] = await Promise.all([
             // Total de pedidos (excluyendo cancelados y entregados)
@@ -80,8 +81,8 @@ export async function GET(request: NextRequest) {
                 }
             }),
             
-            // Ingresos de pedidos entregados
-            prisma.orderDetail.aggregate({
+            // Obtener detalles completos de pedidos entregados para cálculo correcto
+            prisma.orderDetail.findMany({
                 where: {
                     order: {
                         order_status_id: {
@@ -89,27 +90,14 @@ export async function GET(request: NextRequest) {
                         }
                     }
                 },
-                _sum: {
-                    unit_price: true
-                }
-            }),
-            
-            // Ingresos de pedidos en proceso
-            prisma.orderDetail.aggregate({
-                where: {
-                    order: {
-                        order_status_id: {
-                            in: pendingStatusIds
-                        }
-                    }
-                },
-                _sum: {
+                select: {
+                    quantity: true,
                     unit_price: true
                 }
             }),
 
-            // También incluir pedidos con estado "shipped" (enviados)
-            prisma.orderDetail.aggregate({
+            // Obtener detalles completos de pedidos enviados para cálculo correcto
+            prisma.orderDetail.findMany({
                 where: {
                     order: {
                         order_status_id: {
@@ -117,8 +105,27 @@ export async function GET(request: NextRequest) {
                         }
                     }
                 },
-                _sum: {
+                select: {
+                    quantity: true,
                     unit_price: true
+                }
+            }),
+
+            // Contar pedidos entregados para promedio correcto
+            prisma.order.count({
+                where: {
+                    order_status_id: {
+                        in: completedStatusIds
+                    }
+                }
+            }),
+
+            // Contar pedidos enviados para promedio correcto
+            prisma.order.count({
+                where: {
+                    order_status_id: {
+                        in: shippedStatusIds
+                    }
                 }
             }),
 
@@ -145,15 +152,19 @@ export async function GET(request: NextRequest) {
             })
         ]);
 
-        // Calcular ingresos totales (entregados + en proceso + enviados)
-        const completedRevenue = Number(completedOrdersRevenue._sum.unit_price || 0);
-        const inProcessRevenue = Number(inProcessOrdersRevenue._sum.unit_price || 0);
-        const shippedRevenue = Number(shippedOrdersRevenue._sum.unit_price || 0);
-        const totalRevenue = completedRevenue + inProcessRevenue + shippedRevenue;
+        // Calcular ingresos totales (SOLO entregados + enviados) - cálculo correcto por cada detalle
+        const completedRevenue = completedOrderDetails.reduce((sum, detail) => 
+            sum + (Number(detail.quantity) * Number(detail.unit_price)), 0
+        );
+        const shippedRevenue = shippedOrderDetails.reduce((sum, detail) => 
+            sum + (Number(detail.quantity) * Number(detail.unit_price)), 0
+        );
+        const totalRevenue = completedRevenue + shippedRevenue;
 
-        // Calcular valor promedio por pedido
-        const averageOrderValue = totalOrders > 0 
-            ? totalRevenue / totalOrders 
+        // Calcular valor promedio por pedido - CORRECTO: ingresos de pedidos completados / número de pedidos completados
+        const completedOrdersForRevenue = completedOrdersCount + shippedOrdersCount;
+        const averageOrderValue = completedOrdersForRevenue > 0 
+            ? totalRevenue / completedOrdersForRevenue 
             : 0;
 
         const dashboardStats = {

@@ -44,7 +44,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             {/* Sidebar */}
             <div className={`
                 fixed inset-y-0 left-0 z-50 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
-                w-full lg:w-64 lg:top-[3.75rem] lg:bottom-0
+                w-full lg:w-64 lg:top-[0] lg:bottom-0
                 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:-translate-x-60'}
             `}>
                 <div className="relative flex flex-col h-full">

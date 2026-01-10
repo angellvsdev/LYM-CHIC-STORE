@@ -24,33 +24,25 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ data }) => {
             title: 'Pedidos Totales',
             value: data.totalOrders,
             icon: ShoppingBagIcon,
-            color: 'from-amaranth-pink-400 to-pink-lavender-400',
-            change: '+12%',
-            changeType: 'positive'
+            color: 'from-amaranth-pink-400 to-pink-lavender-400'
         },
         {
             title: 'Ingresos Totales',
             value: `$${data.totalRevenue.toLocaleString()}`,
             icon: CurrencyDollarIcon,
-            color: 'from-pale-purple-400 to-lavender-blush-400',
-            change: '+8%',
-            changeType: 'positive'
+            color: 'from-pale-purple-400 to-lavender-blush-400'
         },
         {
             title: 'Pedidos Pendientes',
             value: data.pendingOrders,
             icon: ClockIcon,
-            color: 'from-lavender-blush-400 to-amaranth-pink-400',
-            change: '-5%',
-            changeType: 'negative'
+            color: 'from-lavender-blush-400 to-amaranth-pink-400'
         },
         {
             title: 'Valor Promedio',
             value: `$${data.averageOrderValue}`,
             icon: ChartBarIcon,
-            color: 'from-pink-lavender-400 to-pale-purple-400',
-            change: '+3%',
-            changeType: 'positive'
+            color: 'from-pink-lavender-400 to-pale-purple-400'
         }
     ];
 
@@ -64,11 +56,6 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ data }) => {
                             <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r ${stat.color} rounded-lg sm:rounded-xl flex items-center justify-center`}>
                                 <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
-                            <span className={`text-xs sm:text-sm font-medium ${
-                                stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                                {stat.change}
-                            </span>
                         </div>
                         
                         <div>
