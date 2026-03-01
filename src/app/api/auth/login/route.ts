@@ -82,6 +82,8 @@ export async function POST(req: NextRequest) {
       phone_number: user.phone_number,
       registration_date: user.registration_date,
       role: user.role || "user",
+      age: user.age || undefined,
+      gender: user.gender || undefined,
     };
     await session.save();
 

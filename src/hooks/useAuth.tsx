@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import EmailNotificationService from '@/app/services/EmailNotificationServiceClient';
 
 export interface User {
   id: string;
@@ -17,8 +18,19 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateUser: (userData: Partial<User>) => void;
   isLoading: boolean;
   error: string | null;
+  registerUser: (userData: {
+    name: string;
+    email: string;
+    password: string;
+    phone_number?: string;
+    age?: number;
+    gender?: string;
+  }) => Promise<boolean>;
+  sendVerificationEmail: (email: string, token: string, name?: string) => Promise<boolean>;
+  verifyEmail: (token: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,6 +66,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               role: sessionUser.role === 'admin' ? 'admin' : 'user',
               phone_number: sessionUser.phone_number,
               registration_date: sessionUser.registration_date,
+              age: sessionUser.age,
+              gender: sessionUser.gender,
             };
             setUser(restoredUser);
             localStorage.setItem('user', JSON.stringify(restoredUser));
@@ -142,12 +156,162 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     window.location.href = '/';
   };
 
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      // También actualizar localStorage para persistencia
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
+  const registerUser = async (userData: {
+    name: string;
+    email: string;
+    password: string;
+    phone_number?: string;
+    age?: number;
+    gender?: string;
+  }): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Generar token de verificación
+      const verificationToken = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+      
+      // Enviar correo de verificación
+      const emailSent = await EmailNotificationService.sendAccountVerification({
+        userEmail: userData.email,
+        verificationToken,
+        userName: userData.name
+      });
+
+      if (!emailSent) {
+        setError('Error enviando correo de verificación');
+        return false;
+      }
+
+      // Guardar datos temporales para verificación posterior
+      const tempUserData = {
+        ...userData,
+        verificationToken,
+        isVerified: false
+      };
+      
+      localStorage.setItem('tempUser', JSON.stringify(tempUserData));
+      
+      // Redirigir a página de espera
+      window.location.href = '/register/pending';
+      
+      return true;
+    } catch (error) {
+      setError('Error en el registro. Intenta nuevamente.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const sendVerificationEmail = async (email: string, token: string, name?: string): Promise<boolean> => {
+    try {
+      return await EmailNotificationService.sendAccountVerification({
+        userEmail: email,
+        verificationToken: token,
+        userName: name
+      });
+    } catch (error) {
+      console.error('Error enviando correo de verificación:', error);
+      return false;
+    }
+  };
+
+  const verifyEmail = async (token: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const tempUserStr = localStorage.getItem('tempUser');
+      if (!tempUserStr) {
+        setError('Token de verificación inválido o expirado');
+        return false;
+      }
+
+      const tempUser = JSON.parse(tempUserStr);
+      
+      if (tempUser.verificationToken !== token) {
+        setError('Token de verificación inválido');
+        return false;
+      }
+
+      // Enviar correo de confirmación
+      await EmailNotificationService.sendAccountConfirmation({
+        userEmail: tempUser.email,
+        userName: tempUser.name
+      });
+
+      // Crear usuario en la base de datos a través de la API
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: tempUser.name,
+          email_address: tempUser.email,
+          password: tempUser.password,
+          phone_number: tempUser.phone_number,
+          age: tempUser.age,
+          gender: tempUser.gender,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || 'Error creando usuario');
+        return false;
+      }
+
+      const userData = await response.json();
+      
+      // Crear objeto de usuario para el contexto
+      const verifiedUser: User = {
+        id: userData.user_id.toString(),
+        name: userData.name,
+        email: userData.email_address,
+        role: 'user',
+        phone_number: userData.phone_number,
+        age: userData.age,
+        gender: userData.gender,
+        registration_date: userData.registration_date
+      };
+
+      // Limpiar datos temporales
+      localStorage.removeItem('tempUser');
+      
+      // Mostrar éxito y redirigir al login
+      alert('¡Cuenta verificada exitosamente! Ahora puedes iniciar sesión.');
+      window.location.href = '/login';
+
+      return true;
+    } catch (error) {
+      setError('Error verificando correo. Intenta nuevamente.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     login,
     logout,
+    updateUser,
     isLoading,
     error,
+    registerUser,
+    sendVerificationEmail,
+    verifyEmail
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

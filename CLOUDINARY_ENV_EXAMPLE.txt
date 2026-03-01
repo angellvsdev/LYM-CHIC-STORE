@@ -1,0 +1,14 @@
+# Cloudinary Configuration
+# Add these variables to your .env file
+
+# Cloudinary Cloud Name
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+
+# Cloudinary API Key
+NEXT_PUBLIC_CLOUDINARY_API_KEY=your_api_key
+
+# Cloudinary API Secret (server-side only)
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Optional: Cloudinary Upload Preset
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_upload_preset

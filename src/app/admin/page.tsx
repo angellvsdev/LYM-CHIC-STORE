@@ -12,7 +12,7 @@ import { apiClient } from '@/lib/apiClient';
 
 export default function AdminPage() {
     const [activeSection, setActiveSection] = useState('dashboard');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Cerrado por defecto en móviles
     const [dashboardData, setDashboardData] = useState({
         totalOrders: 0,
         pendingOrders: 0,
@@ -86,13 +86,18 @@ export default function AdminPage() {
                     isOpen={isSidebarOpen}
                     setIsOpen={setIsSidebarOpen}
                 />
-                <div className={`transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-16'}`}>
+                {/* Contenedor principal con responsive correcto */}
+                <div className={`
+                    transition-all duration-300 ease-in-out
+                    lg:ml-64
+                    ml-0  /* Sin margin en móviles */
+                `}>
                     <AdminHeader
                         isSidebarOpen={isSidebarOpen}
                         setIsSidebarOpen={setIsSidebarOpen}
                         onNavigate={setActiveSection}
                     />
-                    <main className="p-6">
+                    <main className="p-4 sm:p-6">
                         {renderMainContent()}
                     </main>
                 </div>

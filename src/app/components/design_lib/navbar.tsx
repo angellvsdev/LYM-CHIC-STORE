@@ -4,7 +4,8 @@ import {
     InformationCircleIcon, 
     PhoneIcon, 
     ChevronDownIcon,
-    ShoppingBagIcon, 
+    ShoppingBagIcon,
+    ShoppingCartIcon, 
     ArrowRightEndOnRectangleIcon, 
     UserIcon,
     UserCircleIcon,
@@ -98,7 +99,6 @@ const UseNavBar = () => {
                             </>
                         )}
                         <Link href="/" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><GiftIcon className="h-6 text-center inline-block" /> Inicio</Link>
-                        <Link href="#" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><InformationCircleIcon className="h-6 text-center inline-block" /> Nosotros</Link>
                         <Link href="/catalog" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><ShoppingBagIcon className="h-6 text-center inline-block" /> Catálogo</Link>
                         {!user && (
                             <>
@@ -106,13 +106,12 @@ const UseNavBar = () => {
                                 <Link href="/login" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><ArrowRightEndOnRectangleIcon className="h-6 text-center inline-block" /> Iniciar Sesión</Link>
                             </>
                         )}
-                        <Link href="#" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><PhoneIcon className="h-6 text-center inline-block" /> Contacto</Link>
+                        <Link target="_blank" href="https://wa.me/+584126589542?text=Hola%2C%20quiero%20consultar%20sobre%20sus%20productos" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white w-full my-2"><PhoneIcon className="h-6 text-center inline-block" /> Contacto</Link>
                     </div> : null}
                 </div>
                 <div className="hidden md:flex items-center justify-center w-full px-4 font-grotesk">
                     <div className="flex space-x-8">
                         <Link href="/" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><GiftIcon className="h-6 text-center inline-block" /> Inicio</Link>
-                        <Link href="#" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><InformationCircleIcon className="h-6 text-center inline-block" /> Nosotros</Link>
                         <Link href="/catalog" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><ShoppingBagIcon className="h-6 text-center inline-block" /> Catálogo</Link>
                         {!user && (
                             <>
@@ -120,7 +119,7 @@ const UseNavBar = () => {
                                 <Link href="/login" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><ArrowRightEndOnRectangleIcon className="h-6 text-center inline-block" /> Iniciar Sesión</Link>
                             </>
                         )}
-                        <Link href="#" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><PhoneIcon className="h-6 text-center inline-block" /> Contacto</Link>
+                        <Link target="_blank" href="https://wa.me/+584126589542?text=Hola%2C%20quiero%20consultar%20sobre%20sus%20productos" className="text-[#510023] text-md bg-white px-3 py-2 rounded-2xl hover:bg-amaranth-pink-100 hover:text-white"><PhoneIcon className="h-6 text-center inline-block" /> Contacto</Link>
                     </div>
                 </div>
             </nav>

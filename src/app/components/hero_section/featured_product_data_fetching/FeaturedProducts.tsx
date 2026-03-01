@@ -4,9 +4,10 @@ import ProductCard from "./../../design_lib/ProductCard";
 import Image from "next/image";
 import { Category, Product } from "@/lib/utils/validation/schemas";
 import axios from "axios";
-
+import { useModal } from "@/app/contexts/ModalContext";
 
 const FeaturedProducts = () => {
+    const { isAnyModalOpen, setModalOpen } = useModal();
     const [categories, setCategories] = useState<Category[]>([]); // Estado para las categorías
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined); // Inicialmente no hay categoría seleccionada
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -39,13 +40,16 @@ const FeaturedProducts = () => {
         }
     }
     useEffect(() => {
+        // No iniciar el intervalo si hay un modal abierto
+        if (isAnyModalOpen) return;
+        
         const timer = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % Math.ceil(products.length / 4));
         }, 5000);
 
         return () => clearInterval(timer);
 
-    }, [products.length]);
+    }, [products.length, isAnyModalOpen]);
     useEffect(() => {
         fetchCategories();
     }, []);

@@ -7,7 +7,8 @@ import {
     Bars3Icon,
     UserCircleIcon,
     ArrowRightOnRectangleIcon,
-    ChevronRightIcon
+    ChevronRightIcon,
+    HomeIcon
 } from '@heroicons/react/24/outline';
 
 interface AdminHeaderProps {
@@ -278,7 +279,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ isSidebarOpen, setIsSidebarOp
             <div className="px-4 sm:px-6 py-3 sm:py-4">
                 <div className="flex items-center justify-between">
                     {/* Botón de menú y búsqueda */}
-                    <div className="flex items-center space-x-2 sm:space-x-4 flex-1">
+                    <div className="flex items-center space-x-2 sm:space-x-4 flex-1 w-1/2">
                         <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                             className="p-2 rounded-lg hover:bg-davys-gray-100 transition-colors lg:hidden"
@@ -332,6 +333,16 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ isSidebarOpen, setIsSidebarOp
                     <div className="flex items-center space-x-2 sm:space-x-4">
                         {/* Notificaciones */}
                         
+                        {/* Botón de volver al inicio */}
+                        <button
+                            type="button"
+                            onClick={() => window.location.href = '/'}
+                            className="p-2 rounded-lg hover:bg-davys-gray-100 transition-colors"
+                            aria-label="Volver al inicio"
+                            title="Volver al inicio"
+                        >
+                            <HomeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-davys-gray-600" />
+                        </button>
 
                         <button
                             type="button"
@@ -347,7 +358,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ isSidebarOpen, setIsSidebarOp
                         <div className="flex items-center space-x-2 sm:space-x-3">
                             <div className="text-right hidden md:block">
                                 <p className="text-sm font-medium text-davys-gray-100">Perfil de Administración</p>
-                                <p className="text-xs text-davys-gray-600">admin@lym.com</p>
+                                <p className="text-xs text-davys-gray-600">lymchicstore@gmail.com</p>
                             </div>
                             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-amaranth-pink-400 to-pink-lavender-400 rounded-full flex items-center justify-center">
                                 <UserCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />

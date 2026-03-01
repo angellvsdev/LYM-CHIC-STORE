@@ -35,6 +35,7 @@ model Product {
   price        Float
   description  String
   image        String
+  images       String[]
   size         String?
   color        String?
   featured     Boolean?

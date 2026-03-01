@@ -2,8 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
+import ProductGallery from "@/app/components/common/ProductGallery";
+import ProductGalleryModal from "./modals/ProductGalleryModal";
 import { apiClient } from "@/lib/apiClient";
-import FormModal from "./modals/FormModal";
+import ProductFormModal from "./modals/ProductFormModal";
 import ConfirmModal from "./modals/ConfirmModal";
 import DetailModal from "./modals/DetailModal";
 
@@ -41,17 +44,29 @@ interface PaginatedResponse<T> {
 }
 
 const ProductsOverview: React.FC = () => {
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showGalleryModal, setShowGalleryModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('');
-    
-    const [products, setProducts] = useState<Product[]>([]);
+
+    // Helper function to get product images
+    const getProductImages = (product: Product): string[] => {
+        if (product.images && product.images.length > 0) {
+            return product.images.filter(img => img && img !== '');
+        } else if (product.image && product.image !== '') {
+            return [product.image];
+        }
+        return [];
+    };
 
     // Fetch products from API
     const fetchProducts = async (categoryId?: string) => {
@@ -107,12 +122,13 @@ const ProductsOverview: React.FC = () => {
                 size: formData.size || null,
                 color: formData.color || null,
                 image: formData.image || '',
+                images: formData.images || [],
                 featured: Boolean(formData.featured),
-                stock: parseInt(formData.stock) || 0  // ← AÑADIR ESTA LÍNEA
+                stock: parseInt(formData.stock) || 0
             };
             
             await apiClient.post('/api/admin/products', body);
-            setShowAddModal(false);
+            setShowCreateModal(false);
             await fetchProducts();
         } catch (error) {
             console.error('Error creating product:', error);
@@ -135,8 +151,9 @@ const ProductsOverview: React.FC = () => {
                 size: formData.size || null,
                 color: formData.color || null,
                 image: formData.image || '',
+                images: formData.images || [],
                 featured: Boolean(formData.featured),
-                stock: parseInt(formData.stock) || 0  // ← AÑADIR ESTA LÍNEA
+                stock: parseInt(formData.stock) || 0
             };
             
             await apiClient.put(`/api/admin/products/${selectedProduct.id}`, body);
@@ -176,6 +193,12 @@ const ProductsOverview: React.FC = () => {
         setShowDeleteModal(true);
     };
 
+    const openGalleryModal = (product: Product, imageIndex: number = 0) => {
+        setSelectedProduct(product);
+        setSelectedGalleryIndex(imageIndex);
+        setShowGalleryModal(true);
+    };
+
     const openDetailModal = (product: Product) => {
         setSelectedProduct(product);
         setShowDetailModal(true);
@@ -209,7 +232,7 @@ const ProductsOverview: React.FC = () => {
                         </div>
                         <button 
                             className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amaranth-pink-400 to-amaranth-pink-500 hover:from-amaranth-pink-500 hover:to-amaranth-pink-600 text-white px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-medium" 
-                            onClick={() => setShowAddModal(true)}
+                            onClick={() => setShowCreateModal(true)}
                         >
                             <PlusIcon className="w-4 h-4" />
                             <span className="text-sm">Agregar Producto</span>
@@ -249,15 +272,21 @@ const ProductsOverview: React.FC = () => {
                                         <div key={product.id} className="bg-white border border-davys-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                                             <div className="flex items-start space-x-4">
                                                 <div className="flex-shrink-0">
-                                                    <img 
-                                                        className="h-16 w-16 rounded-lg object-cover border border-davys-gray-200" 
-                                                        src={product.image || '/api/placeholder/64/64'} 
-                                                        alt={product.name} 
+                                                    <ProductGallery
+                                                        images={getProductImages(product)}
+                                                        alt={product.name}
+                                                        size="small"
+                                                        showNavigation={getProductImages(product).length > 1}
+                                                        onImageClick={(imageUrl) => {
+                                                            const validImages = getProductImages(product);
+                                                            const index = validImages.indexOf(imageUrl);
+                                                            openGalleryModal(product, Math.max(0, index));
+                                                        }}
                                                     />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h3 className="text-base font-semibold text-davys-gray-100 truncate">{product.name}</h3>
-                                                    <p className="text-sm text-davys-gray-600 mt-1 line-clamp-2">{product.description}</p>
+                                                    <h3 className="text-base font-semibold text-davys-gray-100 mx-2">{product.name}</h3>
+                                                    <p className="text-sm text-davys-gray-600 mx-2 truncate">{product.description}</p>
                                                     <div className="flex items-center justify-between mt-3">
                                                         <div className="flex flex-col space-y-1">
                                                             <span className="text-lg font-bold text-davys-gray-100">${product.price.toFixed(2)}</span>
@@ -318,16 +347,22 @@ const ProductsOverview: React.FC = () => {
                                                 <tr key={product.id} className="hover:bg-davys-gray-50 transition-colors">
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="flex items-center">
-                                                            <div className="flex-shrink-0 h-12 w-12">
-                                                                <img 
-                                                                    className="h-12 w-12 rounded-lg object-cover border border-davys-gray-200" 
-                                                                    src={product.image || '/api/placeholder/48/48'} 
-                                                                    alt={product.name} 
+                                                            <div className="flex-shrink-0 h-12 w-12 my-2">
+                                                                <ProductGallery
+                                                                    images={getProductImages(product)}
+                                                                    alt={product.name}
+                                                                    size="small"
+                                                                    showNavigation={getProductImages(product).length > 1}
+                                                                    onImageClick={(imageUrl) => {
+                                                                        const validImages = getProductImages(product);
+                                                                        const index = validImages.indexOf(imageUrl);
+                                                                        openGalleryModal(product, Math.max(0, index));
+                                                                    }}
                                                                 />
                                                             </div>
                                                             <div className="ml-4">
-                                                                <div className="text-sm font-semibold text-davys-gray-100">{product.name}</div>
-                                                                <div className="text-sm text-davys-gray-600 truncate max-w-xs">{product.description}</div>
+                                                                <div className="text-sm font-semibold text-davys-gray-100 mx-4">{product.name}</div>
+                                                                <div className="text-sm text-davys-gray-600 max-w-xs mx-4">{product.description}</div>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -381,11 +416,11 @@ const ProductsOverview: React.FC = () => {
             )}
 
             {/* Add Product Modal */}
-            <FormModal
+            <ProductFormModal
                 title="Agregar Producto"
                 description="Completa la información del nuevo producto"
-                isOpen={showAddModal}
-                onClose={() => setShowAddModal(false)}
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
                 onSubmit={handleAddProduct}
                 isSubmitting={isSubmitting}
                 fields={[
@@ -399,22 +434,22 @@ const ProductsOverview: React.FC = () => {
                         options: categories.map(cat => ({ value: cat.id, label: cat.name }))
                     },
                     { name: "price", label: "Precio ($)", type: "number", required: true },
-                    { name: "stock", label: "Stock", type: "number", required: true },  // ← AÑADIR ESTA LÍNEA
+                    { name: "stock", label: "Stock", type: "number", required: true },
                     { name: "size", label: "Tamaño", type: "text" },
                     { name: "color", label: "Color", type: "text" },
-                    { name: "image", label: "URL de Imagen", type: "text" },
                     { name: "featured", label: "Producto Destacado", type: "checkbox" }
                 ]}
             />
 
             {/* Edit Product Modal */}
-            <FormModal
+            <ProductFormModal
                 title="Editar Producto"
                 description="Modifica la información del producto"
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 onSubmit={handleEditProduct}
                 isSubmitting={isSubmitting}
+                currentImage={selectedProduct?.image}
                 initialData={selectedProduct ? {
                     name: selectedProduct.name,
                     description: selectedProduct.description,
@@ -423,7 +458,9 @@ const ProductsOverview: React.FC = () => {
                     size: selectedProduct.size || '',
                     color: selectedProduct.color || '',
                     image: selectedProduct.image,
-                    featured: selectedProduct.featured
+                    images: selectedProduct.images || [],
+                    featured: selectedProduct.featured,
+                    stock: selectedProduct.stock
                 } : undefined}
                 fields={[
                     { name: "name", label: "Nombre del Producto", type: "text", required: true },
@@ -436,10 +473,9 @@ const ProductsOverview: React.FC = () => {
                         options: categories.map(cat => ({ value: cat.id, label: cat.name }))
                     },
                     { name: "price", label: "Precio ($)", type: "number", required: true },
-                    { name: "stock", label: "Stock", type: "number", required: true },  // ← AÑADIR ESTA LÍNEA
+                    { name: "stock", label: "Stock", type: "number", required: true },
                     { name: "size", label: "Tamaño", type: "text" },
                     { name: "color", label: "Color", type: "text" },
-                    { name: "image", label: "URL de Imagen", type: "text" },
                     { name: "featured", label: "Producto Destacado", type: "checkbox" }
                 ]}
             />
@@ -454,6 +490,15 @@ const ProductsOverview: React.FC = () => {
                 description={`¿Estás seguro de que deseas eliminar "${selectedProduct?.name}"? Esta acción no se puede deshacer y el producto será eliminado permanentemente.`}
                 confirmText="Sí, Eliminar"
                 cancelText="Cancelar"
+            />
+
+            {/* Product Gallery Modal */}
+            <ProductGalleryModal
+                isOpen={showGalleryModal}
+                onClose={() => setShowGalleryModal(false)}
+                images={selectedProduct ? getProductImages(selectedProduct) : []}
+                productName={selectedProduct?.name || ''}
+                initialIndex={selectedGalleryIndex}
             />
 
             {/* Product Detail Modal */}

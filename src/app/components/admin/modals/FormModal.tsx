@@ -21,6 +21,8 @@ interface FormModalProps {
     isSubmitting?: boolean;
     fields: FormField[];
     initialData?: Record<string, any>;
+    onFieldChange?: (fieldName: string, value: any) => void;
+    forceReRender?: boolean; // Para forzar re-render cuando cambian los campos
 }
 
 const FormModal: React.FC<FormModalProps> = ({
@@ -34,8 +36,11 @@ const FormModal: React.FC<FormModalProps> = ({
     isSubmitting = false,
     fields,
     initialData = {},
+    onFieldChange,
+    forceReRender = false,
 }) => {
     const [formData, setFormData] = useState<Record<string, any>>({});
+    const [reRenderKey, setReRenderKey] = useState(0); // Forzar re-render de campos
     const isFirstRender = React.useRef(true);
 
     // Initialize form data when modal opens
@@ -55,7 +60,18 @@ const FormModal: React.FC<FormModalProps> = ({
 
     const handleInputChange = (name: string, value: any) => {
         setFormData(prev => ({ ...prev, [name]: value }));
+        // Call onFieldChange callback if provided
+        if (onFieldChange) {
+            onFieldChange(name, value);
+        }
     };
+
+    // Forzar re-render cuando cambian los campos dinámicamente
+    React.useEffect(() => {
+        if (forceReRender) {
+            setReRenderKey(prev => prev + 1);
+        }
+    }, [fields, forceReRender]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -150,7 +166,7 @@ const FormModal: React.FC<FormModalProps> = ({
                 <form onSubmit={handleSubmit} className="flex-1 p-4 sm:p-6 overflow-y-auto">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
                         {fields.map((field) => (
-                            <div key={field.name} className={field.type === 'textarea' ? 'sm:col-span-2' : ''}>
+                            <div key={`${field.name}-${reRenderKey}`} className={field.type === 'textarea' ? 'sm:col-span-2' : ''}>
                                 {field.type !== 'checkbox' && (
                                     <label htmlFor={field.name} className="block text-sm font-semibold text-davys-gray-600 mb-2">
                                         {field.label}

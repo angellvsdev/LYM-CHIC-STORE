@@ -26,7 +26,7 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, children, classN
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4 overflow-y-auto">
             {/* Overlay */}
             <div 
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
@@ -38,13 +38,13 @@ const BaseModal: React.FC<BaseModalProps> = ({ isOpen, onClose, children, classN
                 role="dialog" 
                 aria-modal="true"
                 aria-labelledby="modal-title"
-                className={`relative z-[101] w-full max-h-[90vh] 
-                    max-w-lg 
-                    sm:max-w-xl 
+                className={`relative z-[101] w-full h-full sm:h-auto max-h-[100vh] sm:max-h-[90vh] 
+                    sm:max-w-lg 
                     md:max-w-2xl 
                     lg:max-w-3xl 
                     xl:max-w-4xl
-                    mx-auto
+                    sm:mx-auto
+                    sm:rounded-2xl
                     ${className || ''}`}
             >
                 {children}

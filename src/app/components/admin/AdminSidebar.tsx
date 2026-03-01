@@ -7,7 +7,8 @@ import {
     DocumentTextIcon,
     Cog6ToothIcon,
     XMarkIcon,
-    WrenchScrewdriverIcon
+    WrenchScrewdriverIcon,
+    UserIcon
 } from '@heroicons/react/24/outline';
 
 interface AdminSidebarProps {
@@ -44,7 +45,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             {/* Sidebar */}
             <div className={`
                 fixed inset-y-0 left-0 z-50 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
-                w-full lg:w-64 lg:top-[0] lg:bottom-0
+                w-full lg:w-64 lg:top-[0] lg:bottom-0  /* Espacio para header en desktop */
                 ${isOpen ? 'translate-x-0' : '-translate-x-full lg:-translate-x-60'}
             `}>
                 <div className="relative flex flex-col h-full">
@@ -66,7 +67,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     {/* Header del sidebar */}
                     <div className="flex items-center justify-between p-4 sm:p-6 border-b border-davys-gray-200 flex-shrink-0">
                         <div className="flex items-center space-x-2 sm:space-x-3">
-                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-amaranth-pink-200 to-amaranth-pink-300 rounded-lg flex items-center justify-center">
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-amaranth-pink-400 rounded-lg flex items-center justify-center">
                                 <span className="text-white font-bold text-xs sm:text-sm"><WrenchScrewdriverIcon className="w-4 h-4 sm:w-5 sm:h-5" /></span>
                             </div>
                             <h2 className="text-lg sm:text-xl font-bold text-davys-gray-100">Panel de Control</h2>
@@ -99,7 +100,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                     className={`
                                         w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-xl transition-all duration-200 text-sm sm:text-base cursor-pointer
                                         ${isActive 
-                                            ? 'bg-gradient-to-r from-amaranth-pink-200 to-amaranth-pink-300 text-white shadow-lg' 
+                                            ? 'bg-amaranth-pink-400 text-white shadow-lg' 
                                             : 'text-davys-gray-600 hover:bg-davys-gray-800 hover:text-white'
                                         }
                                     `}
@@ -114,12 +115,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     {/* Footer del sidebar */}
                     <div className="p-3 sm:p-4 border-t border-davys-gray-200 flex-shrink-0">
                         <div className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-davys-gray-900 rounded-xl">
-                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-amaranth-pink-200 to-amaranth-pink-300 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span className="text-white text-xs font-bold">A</span>
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-davys-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span className="text-white text-xs font-bold"><UserIcon className="w-4 h-4 sm:w-5 sm:h-5" /></span>
                             </div>
                             <div className="min-w-0 flex-1 font-grotesk">
-                                <p className="text-xs sm:text-sm font-medium text-davys-gray-100 truncate">Administrador</p>
-                                <p className="text-xs text-davys-gray-600 truncate">admin@lym.com</p>
+                                <p className="text-xs sm:text-sm font-medium text-davys-gray-100 truncate">Perfil de Administración</p>
+                                <p className="text-xs text-davys-gray-600 truncate">lymchicstore@gmail.com</p>
                             </div>
                         </div>
                     </div>

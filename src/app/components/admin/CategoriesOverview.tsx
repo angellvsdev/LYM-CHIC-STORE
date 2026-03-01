@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { apiClient } from "@/lib/apiClient";
 import FormModal from "./modals/FormModal";
+import CategoryFormModal from "./modals/CategoryFormModal";
 import ConfirmModal from "./modals/ConfirmModal";
 
 // Types matching prisma/model
@@ -259,7 +260,7 @@ const CategoriesOverview: React.FC = () => {
       )}
 
       {/* Add modal */}
-      <FormModal
+      <CategoryFormModal
         title="Agregar categoría"
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -268,18 +269,18 @@ const CategoriesOverview: React.FC = () => {
         fields={[
           { name: "name", label: "Nombre", type: "text", required: true },
           { name: "description", label: "Descripción", type: "textarea", required: true },
-          { name: "image", label: "URL de imagen", type: "text" },
           { name: "featured", label: "Destacada", type: "checkbox" },
         ]}
       />
 
       {/* Edit modal */}
-      <FormModal
+      <CategoryFormModal
         title="Editar categoría"
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         onSubmit={handleUpdate}
         isSubmitting={isSubmitting}
+        currentImage={selected?.image}
         initialData={selected ? {
           name: selected.name,
           description: selected.description,
@@ -289,7 +290,6 @@ const CategoriesOverview: React.FC = () => {
         fields={[
           { name: "name", label: "Nombre", type: "text", required: true },
           { name: "description", label: "Descripción", type: "textarea", required: true },
-          { name: "image", label: "URL de imagen", type: "text" },
           { name: "featured", label: "Destacada", type: "checkbox" },
         ]}
       />

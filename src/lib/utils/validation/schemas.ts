@@ -38,6 +38,9 @@ export const UpdateUserSchema = UserSchema.omit({
   registration_date: true,
   password: true,
   role: true,
+}).extend({
+  age: z.number().int().min(0).max(120).optional(),
+  gender: z.string().optional(),
 });
 
 export const LoginUserSchema = z.object({
@@ -74,6 +77,7 @@ export const ProductSchema = z.object({
   price: z.number().positive(),
   description: z.string(),
   image: z.string(),
+  images: z.array(z.string()).optional(),
   size: z.string().nullable().optional(),
   color: z.string().nullable().optional(),
   featured: z.boolean().nullable().optional(),

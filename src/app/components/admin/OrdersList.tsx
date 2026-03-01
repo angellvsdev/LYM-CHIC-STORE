@@ -15,6 +15,7 @@ import { apiClient } from "@/lib/apiClient";
 import FormModal from './modals/FormModal';
 import ConfirmModal from './modals/ConfirmModal';
 import DetailModal from './modals/DetailModal';
+import EmailNotificationService from '@/app/services/EmailNotificationServiceClient';
 
 // Types matching the API response
 interface Order {
@@ -61,6 +62,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [customers, setCustomers] = useState<any[]>([]);
     const [products, setProducts] = useState<any[]>([]);
+    const [currentOrderData, setCurrentOrderData] = useState<Record<string, any>>({});
 
     // Fetch orders from API
     const fetchOrders = async () => {
@@ -89,8 +91,13 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
     // Fetch products for order creation
     const fetchProducts = async () => {
         try {
-            const { data } = await apiClient.get('/api/admin/products');
-            if (data.success) setProducts(data.data.data);
+            // Obtener TODOS los productos sin límite de paginación
+            const { data } = await apiClient.get('/api/admin/products?limit=1000');
+            if (data.success) {
+                console.log('📦 All products loaded:', data.data.data);
+                console.log('📊 Total products:', data.data.data.length);
+                setProducts(data.data.data);
+            }
         } catch (error) {
             console.error('Error fetching products:', error);
         }
@@ -157,7 +164,30 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
                 }]
             };
 
-            await apiClient.post('/api/admin/orders', body);
+            const response = await apiClient.post('/api/admin/orders', body);
+            
+            // Enviar notificación por correo si la orden se creó exitosamente
+            if (response.data) {
+                const customer = customers.find(c => c.id === parseInt(formData.customerId));
+                if (customer) {
+                    await EmailNotificationService.sendOrderCreatedNotification({
+                        userEmail: customer.email,
+                        orderData: {
+                            orderNumber: response.data.orderNumber || `ORD-${Date.now()}`,
+                            customerName: customer.name,
+                            items: [{
+                                name: selectedProduct?.name || 'Producto',
+                                quantity: parseInt(formData.quantity),
+                                price: selectedProduct?.price || 0
+                            }],
+                            total: (selectedProduct?.price || 0) * parseInt(formData.quantity),
+                            status: 'pending',
+                            paymentMethod: 'pending'
+                        }
+                    });
+                }
+            }
+            
             setShowAddModal(false);
             await fetchOrders();
         } catch (error) {
@@ -177,7 +207,25 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
                 status: formData.status
             };
 
-            await apiClient.patch('/api/admin/orders', body);
+            const response = await apiClient.patch('/api/admin/orders', body);
+            
+            // Enviar notificación por correo si el estado se actualizó exitosamente
+            if (response.data && formData.status !== selectedOrder.status) {
+                await EmailNotificationService.sendOrderStatusUpdate({
+                    userEmail: selectedOrder.customerEmail,
+                    orderData: {
+                        orderNumber: selectedOrder.orderNumber,
+                        status: formData.status,
+                        customerName: selectedOrder.customerName,
+                        items: [{
+                            name: selectedOrder.product,
+                            quantity: selectedOrder.quantity
+                        }]
+                    },
+                    newStatus: formData.status
+                });
+            }
+            
             setShowStatusModal(false);
             await fetchOrders();
         } catch (error) {
@@ -393,9 +441,13 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
             <FormModal
                 title="Nueva Orden"
                 isOpen={showAddModal}
-                onClose={() => setShowAddModal(false)}
+                onClose={() => {
+                    setShowAddModal(false);
+                    setCurrentOrderData({});
+                }}
                 onSubmit={handleAddOrder}
                 isSubmitting={isSubmitting}
+                initialData={currentOrderData}
                 fields={[
                     { 
                         name: "customerId", 

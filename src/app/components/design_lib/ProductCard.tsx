@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Product } from '@/lib/utils/validation/schemas';
 import 'animate.css';
 import ProductInfo from './ProductInfo';
+import { useModal } from '@/app/contexts/ModalContext';
 
 interface ProductCardProps {
     product: Product & { stock?: number };
@@ -10,7 +11,18 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const [showInfo, setShowInfo] = React.useState(false);
+    const { setModalOpen } = useModal();
     
+    // Extraer imágenes del producto (soporta tanto array como imagen única)
+    const productImages = React.useMemo(() => {
+        if (product.images && Array.isArray(product.images)) {
+            return product.images.filter(img => img && img.trim() !== '');
+        } else if (product.image && product.image.trim() !== '') {
+            return [product.image];
+        }
+        return [];
+    }, [product.images, product.image]);
+
     // Validar que el stock sea un número entero
     const stock = typeof product.stock === 'number' ? Math.max(0, Math.floor(product.stock)) : 0;
     const isLowStock = stock <= 5 && stock > 0;
@@ -28,15 +40,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 )}
                 
                 <div className="relative w-full h-[200px]">
-                    <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 320px) 100vw"
-                        className="object-cover rounded-t-lg"
-                        priority
-                    />
-                    <button className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors hover:cursor-pointer">
+                    {productImages.length > 0 ? (
+                        <Image
+                            src={productImages[0]} // Solo la primera imagen
+                            alt={product.name}
+                            fill
+                            sizes="(max-width: 320px) 100vw"
+                            className="object-cover rounded-t-lg"
+                            priority
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-davys-gray-200 rounded-t-lg flex items-center justify-center">
+                            <svg className="w-8 h-8 text-davys-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    )}
+                    <button className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors hover:cursor-pointer z-10">
                         {/* Aquí podrías poner un ícono de favorito o similar */}
                     </button>
                 </div>
@@ -60,7 +80,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         </div>
                         <button
                             className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors hover:cursor-pointer"
-                            onClick={() => setShowInfo(true)}
+                            onClick={() => {
+                                setShowInfo(true);
+                                setModalOpen(true);
+                            }}
                         >
                             Ver Detalles
                         </button>
@@ -68,7 +91,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </div>
             </div>
             {showInfo && (
-                <ProductInfo product={product} onClose={() => setShowInfo(false)} />
+                <ProductInfo 
+                    product={product} 
+                    onClose={() => {
+                        setShowInfo(false);
+                        setModalOpen(false);
+                    }} 
+                />
             )}
         </>
     );

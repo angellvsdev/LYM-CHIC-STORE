@@ -1,10 +1,11 @@
 'use client';
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { useAuth } from "@/hooks/useAuth";
 
 const SignUp = () => {
   const router = useRouter();
+  const { registerUser, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
@@ -90,38 +91,24 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      await axios.post('/api/auth/register', {
+      const success = await registerUser({
         name: formData.name,
-        gender: formData.gender,
-        age: parseInt(formData.age),
-        email_address: formData.email_address,
+        email: formData.email_address,
         password: formData.password,
-        confirmPassword: formData.confirmPassword, // Add confirmPassword to the request
         phone_number: formData.phone_number,
+        age: parseInt(formData.age),
+        gender: formData.gender,
       });
 
-      setSubmitMessage("¡Registro exitoso! Redirigiendo al login...");
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        // Manejo específico de errores de Axios
-        if (error.response) {
-          // El servidor respondió con un código de estado fuera del rango 2xx
-          const errorMessage = error.response.data?.message || "Error en el registro";
-          setSubmitMessage(errorMessage);
-        } else if (error.request) {
-          // La petición fue hecha pero no se recibió respuesta
-          setSubmitMessage("Error de conexión. Verifica tu conexión a internet.");
-        } else {
-          // Algo pasó al configurar la petición
-          setSubmitMessage("Error al procesar la petición.");
-        }
+      if (success) {
+        setSubmitMessage("¡Correo de verificación enviado! Redirigiendo...");
+        // La redirección la maneja el useAuth.registerUser
       } else {
-        // Error no relacionado con Axios
-        setSubmitMessage("Error inesperado. Intenta de nuevo.");
+        setSubmitMessage("Error enviando correo de verificación. Intenta nuevamente.");
       }
+    } catch (error) {
+      console.error('Error en registro:', error);
+      setSubmitMessage("Error inesperado. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -264,10 +251,10 @@ const SignUp = () => {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || authLoading}
               className="mt-2 bg-amaranth-pink-300 cursor-pointer hover:bg-amaranth-pink-200 text-white font-bold py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? "Registrando..." : "Registrarse"}
+              {isLoading || authLoading ? "Enviando correo..." : "Registrarse"}
             </button>
           </form>
           <div className="mt-6 text-center">

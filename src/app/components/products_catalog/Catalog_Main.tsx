@@ -7,6 +7,7 @@ import Search_Bar from "../Search_Bar";
 import Filters from "../design_lib/Filters";
 import { Category, Product } from "@/lib/utils/validation/schemas";
 import axios from "axios";
+import { ModalProvider } from "@/app/contexts/ModalContext";
 
 const Catalog_Main = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -88,7 +89,7 @@ const Catalog_Main = () => {
   }, [selectedCategory, fetchProducts]);
 
   return (
-    <>
+    <ModalProvider>
       <NavBar />
       <main className="min-h-screen bg-gradient-to-b from-amaranth-pink-200 to-amaranth-pink-300 py-12">
         <div className="container mx-auto px-4">
@@ -153,7 +154,7 @@ const Catalog_Main = () => {
                   </p>
                 </div>
               )}
-                            
+              
               {/* Paginación */}
               {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-8">
@@ -183,8 +184,8 @@ const Catalog_Main = () => {
         </div>
       </main>
       <Footer />
-    </>
+    </ModalProvider>
   )
 }
 
-export default Catalog_Main; 
+export default Catalog_Main;

@@ -8,6 +8,8 @@ export interface User {
   password?: string; // La contraseña no siempre se incluirá (ej: en la respuesta de obtener un usuario)
   registration_date: Date;
   role: string; // El rol es obligatorio
+  age?: number; // Edad opcional
+  gender?: string; // Género opcional
 }
 
 // Tipo para la respuesta del cliente (sin el rol)
@@ -73,6 +75,8 @@ export const UserSchema = z.object({
   password: z.string().min(8).max(255).optional(), // La contraseña es opcional para algunas operaciones
   registration_date: z.date(),
   role: z.string().min(1).max(20), // El rol es obligatorio
+  age: z.number().int().min(0).max(120).optional(), // Edad opcional
+  gender: z.string().optional(), // Género opcional
 });
 
 export const PublicUserSchema = z.object({
