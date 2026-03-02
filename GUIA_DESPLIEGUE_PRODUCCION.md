@@ -7,14 +7,22 @@ Esta guía detalla los pasos exactos para llevar tu proyecto a producción utili
 
 ## 1. Preparación del Repositorio (GitHub)
 
-Antes de hacer el despliegue, asegúrate de que todo tu código esté en un repositorio de GitHub.
+Para mantener tu rama principal (`main`) con toda su documentación intacta pero lograr un despliegue sumamente limpio, crearemos una rama dedicada a producción (ej. `deploy`).
 
-1. Hemos configurado el archivo `.gitignore` para omitir la documentación interna y archivos que no son necesarios en producción.
-2. Sube todos tus cambios a la rama principal (`main` o `master`):
+1. Asegúrate de estar en tu rama principal y tener todos tus cambios guardados, y luego crea y muévete a la nueva rama:
+   ```bash
+   git checkout -b deploy
+   ```
+2. Hemos configurado el archivo `.gitignore` para omitir la documentación interna (`*.md`). Sin embargo, como esos archivos ya estaban subidos a tu repositorio previamente, Git los sigue rastreando. Para eliminarlos del caché de Git **solo en esta rama de despliegue** (sin borrarlos de tu disco duro), ejecuta:
+   ```bash
+   git rm -r --cached "*.md"
+   ```
+   *(Nota: conservaremos `README.md` y `GUIA_DESPLIEGUE_PRODUCCION.md` que configuramos en el `.gitignore` como excepciones).*
+3. Haz un commit y sube esta nueva rama limpia a GitHub:
    ```bash
    git add .
-   git commit -m "Preparación para paso a producción"
-   git push origin main
+   git commit -m "Preparación limpia para despliegue en producción"
+   git push -u origin deploy
    ```
 
 ---
@@ -66,6 +74,7 @@ Vercel optimiza automáticamente los proyectos de Next.js y ofrece hosting gratu
 2. Haz clic en **"Add New"** > **"Project"**.
 3. Importa el repositorio de GitHub de `L&M CHIC Store`.
 4. Deja la configuración por defecto de Framework Preset en **Next.js**.
+5. **Importante:** En la configuración del proyecto en Vercel, busca la opción **"Production Branch"** (rama de producción) y cámbiala de `main` a `deploy`. Esto le dirá a Vercel que siempre despliegue los cambios de tu rama limpia.
 
 ### Configuración de Variables de Entorno (Environment Variables)
 Antes de hacer clic en "Deploy", despliega la sección de **Environment Variables** y añade las siguientes:
