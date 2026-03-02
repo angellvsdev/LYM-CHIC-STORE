@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
+import Link from "next/link";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -31,7 +32,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-bl from-white to-amaranth-pink-800">
+    <div className="min-h-screen relative flex items-center justify-center p-4 bg-gradient-to-bl from-white to-amaranth-pink-800">
+      <Link
+        href="/"
+        className="absolute top-4 right-4 md:top-8 md:right-8 bg-amaranth-pink-300 hover:bg-amaranth-pink-200 text-white font-semibold py-2 px-4 rounded-full shadow-md transition-all flex items-center gap-2 z-10 hover:scale-105"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+        </svg>
+        Volver al inicio
+      </Link>
       <div className="w-full max-w-4xl rounded-2xl shadow-lg flex flex-col md:flex-row overflow-hidden shadow-gray-400">
         {/* Sección Izquierda */}
         <div className="md:w-1/2 w-full flex flex-col justify-center items-start p-8 bg-gradient-to-b from-amaranth-pink-300 to-amaranth-pink-200 font-grotesk">

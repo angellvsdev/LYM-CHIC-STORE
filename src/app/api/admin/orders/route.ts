@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Order, OrderFilters, PaginatedResponse } from '@/types/admin';
+import { OrderStatusNotifier } from '@/app/services/OrderStatusNotifier';
 
 const statusCodeToId: Record<string, number> = {
     pending: 1,
@@ -38,14 +39,14 @@ export async function GET(request: NextRequest) {
 
         // Build where clause for filtering
         const where: any = {};
-        
+
         if (status) {
             const orderStatusId = statusCodeToId[status];
             if (orderStatusId) {
                 where.order_status_id = orderStatusId;
             }
         }
-        
+
         if (customerName) {
             where.user = {
                 name: {
@@ -54,14 +55,14 @@ export async function GET(request: NextRequest) {
                 }
             };
         }
-        
+
         if (orderNumber) {
             where.order_number = {
                 contains: orderNumber,
                 mode: 'insensitive'
             };
         }
-        
+
         if (recent === 'true') {
             // Filter for orders from the last week
             const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -117,10 +118,10 @@ export async function GET(request: NextRequest) {
 
         // Transform data for frontend
         const transformedOrders = orders.map(order => {
-            const totalAmount = order.order_details.reduce((sum, detail) => 
+            const totalAmount = order.order_details.reduce((sum, detail) =>
                 sum + (parseFloat(detail.unit_price.toString()) * detail.quantity), 0
             );
-            
+
             return {
                 id: order.order_id.toString(),
                 orderNumber: order.order_number,
@@ -157,9 +158,9 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('Error fetching orders:', error);
         return NextResponse.json(
-            { 
-                success: false, 
-                error: 'Internal server error' 
+            {
+                success: false,
+                error: 'Internal server error'
             },
             { status: 500 }
         );
@@ -173,9 +174,9 @@ export async function PATCH(request: NextRequest) {
 
         if (!orderId || !status) {
             return NextResponse.json(
-                { 
-                    success: false, 
-                    error: 'Order ID and status are required' 
+                {
+                    success: false,
+                    error: 'Order ID and status are required'
                 },
                 { status: 400 }
             );
@@ -184,9 +185,9 @@ export async function PATCH(request: NextRequest) {
         const orderStatusId = statusCodeToId[status];
         if (!orderStatusId) {
             return NextResponse.json(
-                { 
-                    success: false, 
-                    error: 'Invalid status' 
+                {
+                    success: false,
+                    error: 'Invalid status'
                 },
                 { status: 400 }
             );
@@ -226,6 +227,9 @@ export async function PATCH(request: NextRequest) {
             return updated;
         });
 
+        // Notificar cambio de estado vía correo electrónico (Backend Module)
+        await OrderStatusNotifier.notifyStatusChange(updatedOrder.order_id);
+
         // If order is shipped, send notification
         if (status === 'shipped') {
             console.log(`Order ${updatedOrder.order_number} ready for pickup. Send WhatsApp to ${updatedOrder.user.phone_number}`);
@@ -240,9 +244,9 @@ export async function PATCH(request: NextRequest) {
     } catch (error) {
         console.error('Error updating order:', error);
         return NextResponse.json(
-            { 
-                success: false, 
-                error: 'Internal server error' 
+            {
+                success: false,
+                error: 'Internal server error'
             },
             { status: 500 }
         );
@@ -252,18 +256,18 @@ export async function PATCH(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { 
-            user_id, 
-            delivery_method, 
-            order_details 
+        const {
+            user_id,
+            delivery_method,
+            order_details
         } = body;
 
         // Basic validations
         if (!user_id || !delivery_method || !order_details || !Array.isArray(order_details) || order_details.length === 0) {
             return NextResponse.json(
-                { 
-                    success: false, 
-                    error: 'User ID, delivery method, and order details are required' 
+                {
+                    success: false,
+                    error: 'User ID, delivery method, and order details are required'
                 },
                 { status: 400 }
             );
@@ -323,9 +327,9 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Error creating order:', error);
         return NextResponse.json(
-            { 
-                success: false, 
-                error: 'Internal server error' 
+            {
+                success: false,
+                error: 'Internal server error'
             },
             { status: 500 }
         );

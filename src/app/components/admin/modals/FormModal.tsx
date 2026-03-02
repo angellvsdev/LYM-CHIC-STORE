@@ -5,9 +5,10 @@ import BaseModal from './BaseModal';
 interface FormField {
     name: string;
     label: string;
-    type: 'text' | 'textarea' | 'number' | 'select' | 'checkbox';
+    type: 'text' | 'textarea' | 'number' | 'select' | 'checkbox' | 'password';
     required?: boolean;
     options?: { value: string; label: string }[];
+    helpText?: React.ReactNode;
 }
 
 interface FormModalProps {
@@ -80,7 +81,7 @@ const FormModal: React.FC<FormModalProps> = ({
 
     const renderField = (field: FormField) => {
         const value = formData[field.name] || '';
-        
+
         switch (field.type) {
             case 'textarea':
                 return (
@@ -174,6 +175,9 @@ const FormModal: React.FC<FormModalProps> = ({
                                     </label>
                                 )}
                                 {renderField(field)}
+                                {field.helpText && (
+                                    <p className="mt-1 text-xs text-davys-gray-500">{field.helpText}</p>
+                                )}
                             </div>
                         ))}
                     </div>

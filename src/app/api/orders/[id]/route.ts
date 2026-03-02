@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { UpdateOrderSchema } from "@/lib/utils/validation/schemas";
 import { User } from "@/types";
+import { OrderStatusNotifier } from '@/app/services/OrderStatusNotifier';
 
 declare module "iron-session" {
   interface IronSessionData {
@@ -61,6 +62,12 @@ export async function PUT(
     }
     const validatedData = updateOrderParseResult.data;
 
+    // Obtener la orden antes de actualizar para verificar el estado anterior
+    const existingOrder = await prisma.order.findUnique({
+      where: { order_id: orderId },
+      select: { order_status_id: true }
+    });
+
     const order = await prisma.order.update({
       where: {
         order_id: orderId,
@@ -73,6 +80,11 @@ export async function PUT(
         order_details: true,
       },
     });
+
+    // Notificar cambio de estado si varió
+    if (existingOrder && existingOrder.order_status_id !== validatedData.order_status_id) {
+      await OrderStatusNotifier.notifyStatusChange(order.order_id);
+    }
 
     return NextResponse.json(order);
   } catch (error) {

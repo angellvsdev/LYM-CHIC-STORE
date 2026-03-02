@@ -1,18 +1,24 @@
 import React from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { Product } from '@/lib/utils/validation/schemas';
 import 'animate.css';
-import ProductInfo from './ProductInfo';
 import { useModal } from '@/app/contexts/ModalContext';
+import { getBlurDataURL } from '@/lib/utils/imageUtils';
+
+const ProductInfo = dynamic(() => import('./ProductInfo'), {
+    loading: () => <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div></div>,
+    ssr: false,
+});
 
 interface ProductCardProps {
     product: Product & { stock?: number };
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
     const [showInfo, setShowInfo] = React.useState(false);
     const { setModalOpen } = useModal();
-    
+
     // Extraer imágenes del producto (soporta tanto array como imagen única)
     const productImages = React.useMemo(() => {
         if (product.images && Array.isArray(product.images)) {
@@ -26,7 +32,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     // Validar que el stock sea un número entero
     const stock = typeof product.stock === 'number' ? Math.max(0, Math.floor(product.stock)) : 0;
     const isLowStock = stock <= 5 && stock > 0;
-    
+
     return (
         <>
             <div className="flex flex-col bg-davys-gray-100 rounded-lg shadow-lg w-full max-w-[320px] h-[450px] border shadow-amaranth-pink-500 animate__animated animate__flipInY animate__faster relative">
@@ -38,7 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         </span>
                     </div>
                 )}
-                
+
                 <div className="relative w-full h-[200px]">
                     {productImages.length > 0 ? (
                         <Image
@@ -47,7 +53,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                             fill
                             sizes="(max-width: 320px) 100vw"
                             className="object-cover rounded-t-lg"
-                            priority
+                            placeholder="blur"
+                            blurDataURL={getBlurDataURL(320, 200)}
+                            loading="lazy"
                         />
                     ) : (
                         <div className="w-full h-full bg-davys-gray-200 rounded-t-lg flex items-center justify-center">
@@ -91,16 +99,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 </div>
             </div>
             {showInfo && (
-                <ProductInfo 
-                    product={product} 
+                <ProductInfo
+                    product={product}
                     onClose={() => {
                         setShowInfo(false);
                         setModalOpen(false);
-                    }} 
+                    }}
                 />
             )}
         </>
     );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

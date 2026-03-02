@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Documentación interna
+*.md
+!README.md
+!GUIA_DESPLIEGUE_PRODUCCION.md

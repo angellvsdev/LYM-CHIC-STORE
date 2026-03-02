@@ -1,78 +1,25 @@
 'use client'
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import NavBar from "../design_lib/navbar";
 import Footer from "../hero_section/credits/Footer";
 import ProductCard from "../design_lib/ProductCard";
+import ProductSkeleton from "../design_lib/ProductSkeleton";
 import Search_Bar from "../Search_Bar";
 import Filters from "../design_lib/Filters";
 import { Category, Product } from "@/lib/utils/validation/schemas";
-import axios from "axios";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
 import { ModalProvider } from "@/app/contexts/ModalContext";
 
 const Catalog_Main = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data: categoriesData } = useSWR('/api/categories', fetcher, { revalidateOnFocus: false });
+  const categories: Category[] = useMemo(() => categoriesData?.success ? categoriesData.data.data : [], [categoriesData]);
+
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const productsPerPage = 10;
-
-  // Función para obtener categorías
-  const fetchCategories = useCallback(async () => {
-    try {
-      const response = await axios.get('/api/categories');
-      if (response.data.success && response.data.data.data) {
-        console.log('Categorías obtenidas:', response.data.data.data);
-        setCategories(response.data.data.data);
-      }
-    } catch (error) {
-      console.error("Error obteniendo categorías:", error);
-    }
-  }, []);
-
-  // Función para obtener productos
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/api/products', {
-        params: {
-          category_id: selectedCategory,
-          search: searchTerm,
-          page: currentPage,
-          limit: productsPerPage,
-          sort: 'name',
-          order: 'asc',
-          min_price: priceRange[0],
-          max_price: priceRange[1],
-        }
-      });
-      console.log('Productos obtenidos:', response.data.data);
-      setProducts(response.data.data);
-      
-      // Calcular total de páginas (asumiendo que la API devuelve metadata)
-      if (response.data.pagination && response.data.pagination.total) {
-        setTotalPages(response.data.pagination.totalPages);
-      }
-    } catch (error) {
-      console.error("Error obteniendo productos:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedCategory, searchTerm, currentPage, productsPerPage, priceRange]);
-
-  // Función para manejar la búsqueda
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-    setCurrentPage(1); // Resetear a la primera página al buscar
-  };
-
-  // Cargar categorías al montar el componente
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
 
   // Establecer la primera categoría como seleccionada cuando se cargan las categorías
   useEffect(() => {
@@ -81,12 +28,22 @@ const Catalog_Main = () => {
     }
   }, [categories, selectedCategory]);
 
-  // Cargar productos cuando cambian filtros o paginación
-  useEffect(() => {
-    if (selectedCategory) {
-      fetchProducts();
-    }
-  }, [selectedCategory, fetchProducts]);
+  const productUrl = selectedCategory
+    ? `/api/products?category_id=${selectedCategory}&search=${searchTerm}&page=${currentPage}&limit=${productsPerPage}&sort=name&order=asc&min_price=${priceRange[0]}&max_price=${priceRange[1]}`
+    : null;
+
+  const { data: productsData, isLoading } = useSWR(productUrl, fetcher, {
+    keepPreviousData: true,
+  });
+
+  const products: Product[] = useMemo(() => productsData?.data || [], [productsData]);
+  const totalPages = productsData?.pagination?.totalPages || 1;
+
+  // Función para manejar la búsqueda  
+  const handleSearch = useCallback((term: string) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+  }, []);
 
   return (
     <ModalProvider>
@@ -99,12 +56,12 @@ const Catalog_Main = () => {
           <p className="text-white text-center text-lg mb-12">
             Explora nuestra colección completa de productos elegantes y lujosos
           </p>
-          
+
           {/* Barra de búsqueda */}
           <div className="mb-8">
             <Search_Bar onSearch={handleSearch} />
           </div>
-          
+
           {/* Filtros */}
           <div className="mb-8">
             <Filters
@@ -125,15 +82,15 @@ const Catalog_Main = () => {
           </div>
 
           {/* Estado de carga */}
-          {loading && (
-            <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-              <span className="ml-3 text-white text-lg">Cargando productos...</span>
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="flex justify-center">
+                  <ProductSkeleton />
+                </div>
+              ))}
             </div>
-          )}
-
-          {/* Grid de productos */}
-          {!loading && (
+          ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {products.map((product) => (
@@ -147,14 +104,14 @@ const Catalog_Main = () => {
               {products.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-white text-lg">
-                    {searchTerm 
+                    {searchTerm
                       ? `No se encontraron productos que coincidan con "${searchTerm}".`
                       : "No se encontraron productos en esta categoría."
                     }
                   </p>
                 </div>
               )}
-              
+
               {/* Paginación */}
               {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-8">
@@ -165,11 +122,11 @@ const Catalog_Main = () => {
                   >
                     Anterior
                   </button>
-                  
+
                   <span className="text-white px-4 py-2">
                     Página {currentPage} de {totalPages}
                   </span>
-                  
+
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}

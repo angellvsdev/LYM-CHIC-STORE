@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { 
+import {
     UserIcon,
     EnvelopeIcon,
     PhoneIcon,
@@ -75,17 +75,27 @@ const CustomersOverview: React.FC = () => {
     const handleAddCustomer = async (formData: Record<string, any>) => {
         try {
             setIsSubmitting(true);
-            await apiClient.post('/api/admin/customers', {
+            const payload: any = {
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,
-                password: formData.password || 'changeme'
-            });
+            };
+            if (formData.password) {
+                payload.password = formData.password;
+            }
+
+            await apiClient.post('/api/admin/customers', payload);
             setShowAddModal(false);
             await fetchCustomers();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error adding customer:', error);
-            alert('Error al agregar cliente');
+            let errorMessage = 'Error al agregar cliente';
+            if (error.response?.data?.details) {
+                errorMessage = error.response.data.details.map((d: any) => d.message).join('\n');
+            } else if (error.response?.data?.error) {
+                errorMessage = error.response.data.error;
+            }
+            alert(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
@@ -145,7 +155,7 @@ const CustomersOverview: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg sm:text-xl font-bold text-davys-gray-100">Clientes</h2>
                     <div className="flex items-center space-x-3">
-                        <button 
+                        <button
                             className="flex items-center space-x-2 bg-amaranth-pink-400 hover:bg-amaranth-pink-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl transition-colors"
                             onClick={() => setShowAddModal(true)}
                         >
@@ -155,7 +165,7 @@ const CustomersOverview: React.FC = () => {
                     </div>
                 </div>
             </div>
-            
+
             {loading ? (
                 <div className="flex justify-center items-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amaranth-pink-400"></div>
@@ -164,202 +174,202 @@ const CustomersOverview: React.FC = () => {
             ) : customers.length === 0 ? (
                 <div className="text-center text-davys-gray-500 py-12">No hay clientes registrados.</div>
             ) : (
-            <>
-            {/* Vista de tarjetas para móviles */}
-            <div className="block lg:hidden p-4 space-y-4">
-                {customers.map((customer) => {
-                    const statusInfo = getStatusInfo(customer.status);
-                    const tierInfo = getCustomerTier(customer.totalSpent);
-                    
-                    return (
-                        <div key={customer.id} className="bg-white rounded-2xl shadow-lg border-l-4 border-amaranth-pink-400 p-4 relative">
-                            {/* Badge de estado en la esquina superior derecha */}
-                            <div className="absolute top-4 right-4">
-                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
-                                    {statusInfo.label}
-                                </span>
-                            </div>
-                            
-                            {/* Contenido principal */}
-                            <div className="pr-20">
-                                {/* Título principal */}
-                                <h3 className="text-lg font-bold text-davys-gray-100 mb-2">
-                                    {customer.name}
-                                </h3>
-                                
-                                {/* Información de contacto */}
-                                <div className="space-y-1 mb-2">
-                                    <div className="flex items-center text-sm text-davys-gray-600">
-                                        <EnvelopeIcon className="w-4 h-4 mr-2 text-amaranth-pink-400" />
-                                        <span className="truncate">{customer.email}</span>
-                                    </div>
-                                    <div className="flex items-center text-sm text-davys-gray-600">
-                                        <PhoneIcon className="w-4 h-4 mr-2 text-amaranth-pink-400" />
-                                        <span>{customer.phone}</span>
-                                    </div>
-                                </div>
-                                
-                                {/* Información de pedidos */}
-                                <div className="flex items-center text-sm text-davys-gray-600 mb-2">
-                                    <ShoppingBagIcon className="w-4 h-4 mr-2 text-amaranth-pink-400" />
-                                    <span>{customer.totalOrders} pedidos</span>
-                                    <span className="ml-2 text-xs text-davys-gray-500">
-                                        (Último: {customer.lastOrder})
-                                    </span>
-                                </div>
-                                
-                                {/* Fecha de registro */}
-                                <div className="flex items-center text-sm text-davys-gray-600 mb-3">
-                                    <CalendarIcon className="w-4 h-4 mr-2 text-amaranth-pink-400" />
-                                    <span>Registrado: {customer.registeredAt}</span>
-                                </div>
-                                
-                                {/* Total gastado */}
-                                <div className="text-lg font-bold text-davys-gray-100 mb-3">
-                                    ${customer.totalSpent}
-                                    <span className={`ml-2 text-sm font-medium ${tierInfo.color}`}>
-                                        ({tierInfo.label})
-                                    </span>
-                                </div>
-                                
-                                {/* Botones de acción */}
-                                <div className="flex space-x-2">
-                                    <button 
-                                        className="flex-1 bg-amaranth-pink-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amaranth-pink-500 transition-colors"
-                                        onClick={() => console.log('Ver cliente:', customer.id)}
-                                    >
-                                        <EyeIcon className="w-4 h-4 inline mr-2" />
-                                        Ver Perfil
-                                    </button>
-                                    <button 
-                                        className="px-4 py-2 border border-davys-gray-300 text-davys-gray-600 rounded-lg text-sm font-medium hover:bg-davys-gray-50 transition-colors"
-                                        onClick={() => openEditModal(customer)}
-                                    >
-                                        <PencilIcon className="w-4 h-4" />
-                                    </button>
-                                    <button 
-                                        className="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
-                                        onClick={() => openDeleteModal(customer)}
-                                        title="Eliminar"
-                                    >
-                                        <TrashIcon className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-            
-            {/* Vista de tabla para desktop */}
-            <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full">
-                    <thead className="bg-davys-gray-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
-                                Cliente
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
-                                Contacto
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
-                                Pedidos
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
-                                Total Gastado
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
-                                Estado
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
-                                Acciones
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-davys-gray-200">
+                <>
+                    {/* Vista de tarjetas para móviles */}
+                    <div className="block lg:hidden p-4 space-y-4">
                         {customers.map((customer) => {
                             const statusInfo = getStatusInfo(customer.status);
                             const tierInfo = getCustomerTier(customer.totalSpent);
-                            
+
                             return (
-                                <tr key={customer.id} className="hover:bg-davys-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="w-10 h-10 bg-gradient-to-r from-amaranth-pink-400 to-pink-lavender-400 rounded-full flex items-center justify-center mr-3">
-                                                <UserIcon className="w-5 h-5 text-white" />
-                                            </div>
-                                            <div>
-                                                <div className="text-sm font-medium text-davys-gray-100">
-                                                    {customer.name}
-                                                </div>
-                                                <div className={`text-xs font-medium ${tierInfo.color}`}>
-                                                    {tierInfo.label}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center text-sm text-davys-gray-600">
-                                                <EnvelopeIcon className="w-3 h-3 mr-1" />
-                                                {customer.email}
-                                            </div>
-                                            <div className="flex items-center text-sm text-davys-gray-600">
-                                                <PhoneIcon className="w-3 h-3 mr-1" />
-                                                {customer.phone}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div>
-                                            <div className="text-sm font-medium text-davys-gray-100">
-                                                {customer.totalOrders}
-                                            </div>
-                                            <div className="text-xs text-davys-gray-600">
-                                                Último: {customer.lastOrder}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-davys-gray-100">
-                                            ${customer.totalSpent}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+                                <div key={customer.id} className="bg-white rounded-2xl shadow-lg border-l-4 border-amaranth-pink-400 p-4 relative">
+                                    {/* Badge de estado en la esquina superior derecha */}
+                                    <div className="absolute top-4 right-4">
+                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
                                             {statusInfo.label}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    </div>
+
+                                    {/* Contenido principal */}
+                                    <div className="pr-20">
+                                        {/* Título principal */}
+                                        <h3 className="text-lg font-bold text-davys-gray-100 mb-2">
+                                            {customer.name}
+                                        </h3>
+
+                                        {/* Información de contacto */}
+                                        <div className="space-y-1 mb-2">
+                                            <div className="flex items-center text-sm text-davys-gray-600">
+                                                <EnvelopeIcon className="w-4 h-4 mr-2 text-amaranth-pink-400" />
+                                                <span className="truncate">{customer.email}</span>
+                                            </div>
+                                            <div className="flex items-center text-sm text-davys-gray-600">
+                                                <PhoneIcon className="w-4 h-4 mr-2 text-amaranth-pink-400" />
+                                                <span>{customer.phone}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Información de pedidos */}
+                                        <div className="flex items-center text-sm text-davys-gray-600 mb-2">
+                                            <ShoppingBagIcon className="w-4 h-4 mr-2 text-amaranth-pink-400" />
+                                            <span>{customer.totalOrders} pedidos</span>
+                                            <span className="ml-2 text-xs text-davys-gray-500">
+                                                (Último: {customer.lastOrder})
+                                            </span>
+                                        </div>
+
+                                        {/* Fecha de registro */}
+                                        <div className="flex items-center text-sm text-davys-gray-600 mb-3">
+                                            <CalendarIcon className="w-4 h-4 mr-2 text-amaranth-pink-400" />
+                                            <span>Registrado: {customer.registeredAt}</span>
+                                        </div>
+
+                                        {/* Total gastado */}
+                                        <div className="text-lg font-bold text-davys-gray-100 mb-3">
+                                            ${customer.totalSpent}
+                                            <span className={`ml-2 text-sm font-medium ${tierInfo.color}`}>
+                                                ({tierInfo.label})
+                                            </span>
+                                        </div>
+
+                                        {/* Botones de acción */}
                                         <div className="flex space-x-2">
-                                            <button 
-                                                className="text-amaranth-pink-400 hover:text-amaranth-pink-500"
+                                            <button
+                                                className="flex-1 bg-amaranth-pink-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amaranth-pink-500 transition-colors"
                                                 onClick={() => console.log('Ver cliente:', customer.id)}
                                             >
-                                                <EyeIcon className="w-4 h-4" />
+                                                <EyeIcon className="w-4 h-4 inline mr-2" />
+                                                Ver Perfil
                                             </button>
-                                            <button 
-                                                className="text-davys-gray-400 hover:text-davys-gray-600"
+                                            <button
+                                                className="px-4 py-2 border border-davys-gray-300 text-davys-gray-600 rounded-lg text-sm font-medium hover:bg-davys-gray-50 transition-colors"
                                                 onClick={() => openEditModal(customer)}
                                             >
                                                 <PencilIcon className="w-4 h-4" />
                                             </button>
                                             <button
-                                                className="text-red-500 hover:text-red-600"
+                                                className="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
                                                 onClick={() => openDeleteModal(customer)}
                                                 title="Eliminar"
                                             >
                                                 <TrashIcon className="w-4 h-4" />
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                </div>
                             );
                         })}
-                    </tbody>
-                </table>
-            </div>
-            </>
+                    </div>
+
+                    {/* Vista de tabla para desktop */}
+                    <div className="hidden lg:block overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-davys-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
+                                        Cliente
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
+                                        Contacto
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
+                                        Pedidos
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
+                                        Total Gastado
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
+                                        Estado
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-davys-gray-600 uppercase tracking-wider">
+                                        Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-davys-gray-200">
+                                {customers.map((customer) => {
+                                    const statusInfo = getStatusInfo(customer.status);
+                                    const tierInfo = getCustomerTier(customer.totalSpent);
+
+                                    return (
+                                        <tr key={customer.id} className="hover:bg-davys-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <div className="w-10 h-10 bg-gradient-to-r from-amaranth-pink-400 to-pink-lavender-400 rounded-full flex items-center justify-center mr-3">
+                                                        <UserIcon className="w-5 h-5 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-medium text-davys-gray-100">
+                                                            {customer.name}
+                                                        </div>
+                                                        <div className={`text-xs font-medium ${tierInfo.color}`}>
+                                                            {tierInfo.label}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center text-sm text-davys-gray-600">
+                                                        <EnvelopeIcon className="w-3 h-3 mr-1" />
+                                                        {customer.email}
+                                                    </div>
+                                                    <div className="flex items-center text-sm text-davys-gray-600">
+                                                        <PhoneIcon className="w-3 h-3 mr-1" />
+                                                        {customer.phone}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div>
+                                                    <div className="text-sm font-medium text-davys-gray-100">
+                                                        {customer.totalOrders}
+                                                    </div>
+                                                    <div className="text-xs text-davys-gray-600">
+                                                        Último: {customer.lastOrder}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-davys-gray-100">
+                                                    ${customer.totalSpent}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color}`}>
+                                                    {statusInfo.label}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <div className="flex space-x-2">
+                                                    <button
+                                                        className="text-amaranth-pink-400 hover:text-amaranth-pink-500"
+                                                        onClick={() => console.log('Ver cliente:', customer.id)}
+                                                    >
+                                                        <EyeIcon className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        className="text-davys-gray-400 hover:text-davys-gray-600"
+                                                        onClick={() => openEditModal(customer)}
+                                                    >
+                                                        <PencilIcon className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        className="text-red-500 hover:text-red-600"
+                                                        onClick={() => openDeleteModal(customer)}
+                                                        title="Eliminar"
+                                                    >
+                                                        <TrashIcon className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
             )}
 
 
@@ -375,7 +385,13 @@ const CustomersOverview: React.FC = () => {
                     { name: 'name', label: 'Nombre Completo', type: 'text', required: true },
                     { name: 'email', label: 'Email', type: 'text', required: true },
                     { name: 'phone', label: 'Teléfono', type: 'text', required: true },
-                    { name: 'password', label: 'Contraseña', type: 'text', required: false }
+                    {
+                        name: 'password',
+                        label: 'Contraseña (Opcional)',
+                        type: 'text',
+                        required: false,
+                        helpText: 'Déjalo vacío para autogenerar. Si escribes una, debe tener mínimo 8 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&).'
+                    }
                 ]}
             />
 
@@ -401,12 +417,14 @@ const CustomersOverview: React.FC = () => {
                     { name: 'email', label: 'Email', type: 'text', required: true },
                     { name: 'phone', label: 'Teléfono', type: 'text', required: true },
                     { name: 'age', label: 'Edad', type: 'text', required: false },
-                    { name: 'gender', label: 'Género', type: 'select', required: false, options: [
-                        { value: '', label: 'No especificado' },
-                        { value: 'male', label: 'Masculino' },
-                        { value: 'female', label: 'Femenino' },
-                        { value: 'other', label: 'Otro' }
-                    ]}
+                    {
+                        name: 'gender', label: 'Género', type: 'select', required: false, options: [
+                            { value: '', label: 'No especificado' },
+                            { value: 'male', label: 'Masculino' },
+                            { value: 'female', label: 'Femenino' },
+                            { value: 'other', label: 'Otro' }
+                        ]
+                    }
                 ]}
             />
 

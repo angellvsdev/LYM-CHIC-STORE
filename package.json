@@ -22,6 +22,7 @@
     "db:reset": "npx prisma migrate reset --force",
     "db:migrate": "npx prisma migrate dev",
     "db:seed": "npx prisma db seed",
+    "db:seed:prod": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" prisma/production-seed.ts",
     "db:studio": "npx prisma studio",
     "db:create-test-users": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/create-test-users.ts",
     "db:diagnose-users": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/diagnose-users.ts",

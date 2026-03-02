@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { 
+import {
     EyeIcon,
     PencilIcon,
     CheckCircleIcon,
@@ -58,7 +58,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
-    
+
     const [orders, setOrders] = useState<Order[]>([]);
     const [customers, setCustomers] = useState<any[]>([]);
     const [products, setProducts] = useState<any[]>([]);
@@ -112,38 +112,38 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
     const getStatusInfo = (status: Order['status']) => {
         switch (status) {
             case 'pending':
-                return { 
-                    label: 'Pendiente', 
+                return {
+                    label: 'Pendiente',
                     color: 'bg-blue-100 text-blue-800',
                     icon: ClockIcon
                 };
             case 'processing':
-                return { 
-                    label: 'En proceso', 
+                return {
+                    label: 'En proceso',
                     color: 'bg-yellow-100 text-yellow-800',
                     icon: ExclamationTriangleIcon
                 };
             case 'shipped':
-                return { 
-                    label: 'Enviado', 
+                return {
+                    label: 'Enviado',
                     color: 'bg-green-100 text-green-800',
                     icon: CheckCircleIcon
                 };
             case 'delivered':
-                return { 
-                    label: 'Entregado', 
+                return {
+                    label: 'Entregado',
                     color: 'bg-purple-100 text-purple-800',
                     icon: UsersIcon
                 };
             case 'cancelled':
-                return { 
-                    label: 'Cancelado', 
+                return {
+                    label: 'Cancelado',
                     color: 'bg-gray-100 text-gray-800',
                     icon: CheckCircleIcon
                 };
             default:
-                return { 
-                    label: 'Desconocido', 
+                return {
+                    label: 'Desconocido',
                     color: 'bg-gray-100 text-gray-800',
                     icon: ClockIcon
                 };
@@ -165,7 +165,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
             };
 
             const response = await apiClient.post('/api/admin/orders', body);
-            
+
             // Enviar notificación por correo si la orden se creó exitosamente
             if (response.data) {
                 const customer = customers.find(c => c.id === parseInt(formData.customerId));
@@ -187,7 +187,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
                     });
                 }
             }
-            
+
             setShowAddModal(false);
             await fetchOrders();
         } catch (error) {
@@ -199,7 +199,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
 
     const handleUpdateStatus = async (formData: Record<string, any>) => {
         if (!selectedOrder) return;
-        
+
         try {
             setIsSubmitting(true);
             const body = {
@@ -208,24 +208,9 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
             };
 
             const response = await apiClient.patch('/api/admin/orders', body);
-            
-            // Enviar notificación por correo si el estado se actualizó exitosamente
-            if (response.data && formData.status !== selectedOrder.status) {
-                await EmailNotificationService.sendOrderStatusUpdate({
-                    userEmail: selectedOrder.customerEmail,
-                    orderData: {
-                        orderNumber: selectedOrder.orderNumber,
-                        status: formData.status,
-                        customerName: selectedOrder.customerName,
-                        items: [{
-                            name: selectedOrder.product,
-                            quantity: selectedOrder.quantity
-                        }]
-                    },
-                    newStatus: formData.status
-                });
-            }
-            
+
+            // El envío de notificación ahora se hace directamente en el backend (OrderStatusNotifier)
+
             setShowStatusModal(false);
             await fetchOrders();
         } catch (error) {
@@ -271,7 +256,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
             <div className="p-4 sm:p-6 border-b border-davys-gray-200">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
                     <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-davys-gray-100">Órdenes Recientes</h2>
-                    <button 
+                    <button
                         className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amaranth-pink-400 to-amaranth-pink-500 hover:from-amaranth-pink-500 hover:to-amaranth-pink-600 text-white px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-medium w-full sm:w-auto"
                         onClick={() => setShowAddModal(true)}
                     >
@@ -307,7 +292,7 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
                             {orders.slice(0, 5).map((order) => {
                                 const statusInfo = getStatusInfo(order.status);
                                 const StatusIcon = statusInfo.icon;
-                                
+
                                 return (
                                     <div key={order.id} className="border border-davys-gray-200 rounded-xl p-4 sm:p-5 hover:bg-davys-gray-50 transition-all duration-200 hover:shadow-md">
                                         {/* Mobile Layout */}
@@ -449,31 +434,31 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
                 isSubmitting={isSubmitting}
                 initialData={currentOrderData}
                 fields={[
-                    { 
-                        name: "customerId", 
-                        label: "Cliente", 
-                        type: "select", 
+                    {
+                        name: "customerId",
+                        label: "Cliente",
+                        type: "select",
                         required: true,
-                        options: customers.map(customer => ({ 
-                            value: customer.id, 
-                            label: `${customer.name} (${customer.email})` 
+                        options: customers.map(customer => ({
+                            value: customer.id,
+                            label: `${customer.name} (${customer.email})`
                         }))
                     },
-                    { 
-                        name: "productId", 
-                        label: "Producto", 
-                        type: "select", 
+                    {
+                        name: "productId",
+                        label: "Producto",
+                        type: "select",
                         required: true,
-                        options: products.map(product => ({ 
-                            value: product.id, 
-                            label: `${product.name} - $${product.price}` 
+                        options: products.map(product => ({
+                            value: product.id,
+                            label: `${product.name} - $${product.price}`
                         }))
                     },
                     { name: "quantity", label: "Cantidad", type: "number", required: true },
-                    { 
-                        name: "deliveryMethod", 
-                        label: "Método de entrega", 
-                        type: "select", 
+                    {
+                        name: "deliveryMethod",
+                        label: "Método de entrega",
+                        type: "select",
                         required: true,
                         options: [
                             { value: "PICKUP", label: "Recoger en tienda" },
@@ -494,10 +479,10 @@ const OrdersList: React.FC<OrdersListProps> = ({ recentOnly = false }) => {
                     status: selectedOrder.status
                 } : undefined}
                 fields={[
-                    { 
-                        name: "status", 
-                        label: "Estado", 
-                        type: "select", 
+                    {
+                        name: "status",
+                        label: "Estado",
+                        type: "select",
                         required: true,
                         options: [
                             { value: "pending", label: "Pendiente" },
