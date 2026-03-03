@@ -50,7 +50,7 @@
     "date-fns": "^4.1.0",
     "iron-session": "^8.0.4",
     "multer": "^2.0.2",
-    "next": "15.2.4",
+    "next": "^16.1.6",
     "next-cloudinary": "^6.16.0",
     "pg": "^8.14.1",
     "react": "^18.2.0",
