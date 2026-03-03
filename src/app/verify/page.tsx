@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
-const VerifyEmail = () => {
+const VerifyEmailContent = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const searchParams = useSearchParams();
@@ -13,7 +13,7 @@ const VerifyEmail = () => {
 
   useEffect(() => {
     const token = searchParams.get('token');
-    
+
     if (!token) {
       setStatus('error');
       setMessage('Token de verificación no proporcionado');
@@ -23,11 +23,11 @@ const VerifyEmail = () => {
     const verifyEmailToken = async () => {
       try {
         const result = await verifyEmail(token);
-        
+
         if (result) {
           setStatus('success');
           setMessage('¡Correo verificado exitosamente! Redirigiendo...');
-          
+
           // Redirigir después de 2 segundos
           setTimeout(() => {
             router.push('/profile');
@@ -46,6 +46,65 @@ const VerifyEmail = () => {
   }, [searchParams, verifyEmail, router]);
 
   return (
+    <div className="text-center">
+      {status === 'loading' && (
+        <div className="space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amaranth-pink-600 mx-auto"></div>
+          <p className="text-gray-600">Verificando tu correo...</p>
+        </div>
+      )}
+
+      {status === 'success' && (
+        <div className="space-y-4">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L4.5 17.5l7.5-7.5L19 8l-7.5 7.5z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-semibold text-green-600 mb-2">
+            ¡Correo Verificado!
+          </h2>
+          <p className="text-gray-600">
+            {message}
+          </p>
+        </div>
+      )}
+
+      {status === 'error' && (
+        <div className="space-y-4">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h.013M12 19v2m0 4h.01M12 19v2M9 9h6m-6 0v6h6" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-semibold text-red-600 mb-2">
+            Error de Verificación
+          </h2>
+          <p className="text-gray-600">
+            {message}
+          </p>
+          <div className="mt-6 space-y-3">
+            <button
+              onClick={() => router.push('/login')}
+              className="w-full bg-amaranth-pink-600 text-white py-3 px-4 rounded-lg hover:bg-amaranth-pink-700 transition-colors"
+            >
+              Volver al Inicio de Sesión
+            </button>
+            <button
+              onClick={() => window.location.href = `mailto:lymchicstore@gmail.com?subject=Problema%20verificaci%C3%B3n%20correo&body=Token:%20${searchParams.get('token')}`}
+              className="w-full bg-gray-600 text-white py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Contactar Soporte
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const VerifyEmail = () => {
+  return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-bl from-white to-amaranth-pink-800">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 font-grotesk">
         {/* Logo y Header */}
@@ -58,61 +117,15 @@ const VerifyEmail = () => {
           </p>
         </div>
 
-        {/* Contenido Principal */}
-        <div className="text-center">
-          {status === 'loading' && (
-            <div className="space-y-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amaranth-pink-600 mx-auto"></div>
-              <p className="text-gray-600">Verificando tu correo...</p>
-            </div>
-          )}
-
-          {status === 'success' && (
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L4.5 17.5l7.5-7.5L19 8l-7.5 7.5z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-semibold text-green-600 mb-2">
-                ¡Correo Verificado!
-              </h2>
-              <p className="text-gray-600">
-                {message}
-              </p>
-            </div>
-          )}
-
-          {status === 'error' && (
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h.013M12 19v2m0 4h.01M12 19v2M9 9h6m-6 0v6h6" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-semibold text-red-600 mb-2">
-                Error de Verificación
-              </h2>
-              <p className="text-gray-600">
-                {message}
-              </p>
-              <div className="mt-6 space-y-3">
-                <button
-                  onClick={() => router.push('/login')}
-                  className="w-full bg-amaranth-pink-600 text-white py-3 px-4 rounded-lg hover:bg-amaranth-pink-700 transition-colors"
-                >
-                  Volver al Inicio de Sesión
-                </button>
-                <button
-                  onClick={() => window.location.href = `mailto:lymchicstore@gmail.com?subject=Problema%20verificaci%C3%B3n%20correo&body=Token:%20${searchParams.get('token')}`}
-                  className="w-full bg-gray-600 text-white py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Contactar Soporte
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Contenido Principal con Suspense */}
+        <Suspense fallback={
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amaranth-pink-600 mx-auto"></div>
+            <p className="text-gray-600">Cargando verificación...</p>
+          </div>
+        }>
+          <VerifyEmailContent />
+        </Suspense>
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
