@@ -1,16 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 // Configuración del servidor
 const config = {
-  apiKey: process.env.RESEND_API_KEY || '',
-  fromEmail: process.env.RESEND_FROM_EMAIL || 'noreply@lymchicstore.onrender.com',
-  frontendUrl: process.env.FRONTEND_URL || 'https://lymchicstore.onrender.com',
+  emailUser: process.env.EMAIL_USER || 'lymchicstore@gmail.com',
+  emailPass: process.env.EMAIL_PASS || '',
+  fromEmail: `"L&M CHIC Store" <${process.env.EMAIL_USER || 'lymchicstore@gmail.com'}>`,
+  frontendUrl: process.env.FRONTEND_URL || 'https://lymchicstore.vercel.app',
   businessEmail: process.env.BUSINESS_EMAIL || 'lymchicstore@gmail.com'
 };
 
-// Inicializar Resend solo en el servidor
-const resend = config.apiKey ? new Resend(config.apiKey) : null;
+const transporter = config.emailPass ? nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: config.emailUser, pass: config.emailPass }
+}) : null;
+
+// Emulador de Resend con Nodemailer
+const resend = transporter ? {
+  emails: {
+    send: async (options: any) => {
+      return transporter.sendMail({
+        from: options.from || config.fromEmail,
+        to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
+        subject: options.subject,
+        html: options.html
+      });
+    }
+  }
+} : null;
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (!resend) {
       return NextResponse.json(
-        { success: false, message: 'RESEND_API_KEY no configurada en el servidor' },
+        { success: false, message: 'EMAIL_PASS de Gmail no configurado en el servidor' },
         { status: 500 }
       );
     }
@@ -64,7 +81,7 @@ export async function POST(request: NextRequest) {
 
 async function sendVerificationEmail(data: any) {
   const verificationUrl = `${config.frontendUrl}/verify?token=${data.verificationToken}`;
-  
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -254,7 +271,7 @@ async function sendOrderStatusEmail(data: any) {
   };
 
   const currentStatus = statusInfo[data.newStatus as keyof typeof statusInfo];
-  
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
