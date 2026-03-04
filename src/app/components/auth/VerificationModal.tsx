@@ -1,0 +1,105 @@
+import React from 'react';
+
+interface VerificationModalProps {
+    isOpen: boolean;
+    email: string;
+    onResend: () => void;
+    onCancel: () => void;
+    isResending?: boolean;
+}
+
+const VerificationModal: React.FC<VerificationModalProps> = ({
+    isOpen,
+    email,
+    onResend,
+    onCancel,
+    isResending = false
+}) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+            <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 md:p-10 font-grotesk relative transform transition-all animate-slideUp">
+
+                {/* Header / Logo */}
+                <div className="text-center mb-8">
+                    <div className="text-4xl font-bold text-amaranth-pink-600 mb-2 tracking-tight">
+                        🎀 L&M CHIC Store
+                    </div>
+                </div>
+
+                {/* Content Box */}
+                <div className="text-center bg-pink-50/50 rounded-2xl p-8 border border-pink-100 shadow-inner">
+                    <div className="text-6xl mb-6 flex justify-center">
+                        {/* Animación local simulando el envío del correo */}
+                        <div className="relative">
+                            <span className="block animate-bounce">✨</span>
+                            <span className="absolute -bottom-2 -right-2 text-4xl">✉️</span>
+                        </div>
+                    </div>
+
+                    <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                        ¡Tu cuenta casi está lista!
+                    </h2>
+
+                    <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                        Hemos enviado un enlace de confirmación a tu dirección de correo electrónico:<br />
+                        <strong className="text-amaranth-pink-600 block mt-3 text-xl">{email}</strong>
+                    </p>
+
+                    <div className="text-left bg-white p-5 rounded-xl border border-pink-100 mb-8 shadow-sm">
+                        <h3 className="font-bold text-gray-700 mb-3 flex items-center">
+                            <span className="mr-2">📝</span> Siguientes pasos:
+                        </h3>
+                        <ul className="space-y-3 text-gray-600">
+                            <li className="flex items-start">
+                                <span className="text-amaranth-pink-500 mr-2">1.</span>
+                                Abre tu correo electrónico y busca un mensaje de L&M CHIC Store.
+                            </li>
+                            <li className="flex items-start">
+                                <span className="text-amaranth-pink-500 mr-2">2.</span>
+                                Haz clic en el botón <strong>"Verificar mi Cuenta"</strong> dentro del correo.
+                            </li>
+                            <li className="flex items-start">
+                                <span className="text-amaranth-pink-500 mr-2">3.</span>
+                                ¡Listo! Podrás iniciar sesión con tu cuenta inmediatamente.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="flex flex-col space-y-3">
+                        <button
+                            onClick={onResend}
+                            disabled={isResending}
+                            className="w-full bg-gradient-to-r from-amaranth-pink-700 to-amaranth-pink-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-amaranth-pink-800 hover:to-amaranth-pink-600 transition-all shadow-lg transform hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center"
+                        >
+                            {isResending ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Reenviando...
+                                </>
+                            ) : (
+                                'Reenviar Correo de Verificación'
+                            )}
+                        </button>
+                        <button
+                            onClick={onCancel}
+                            className="w-full bg-transparent border-2 border-gray-200 text-gray-600 py-3 px-6 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all"
+                        >
+                            Modificar Correo o Cancelar
+                        </button>
+                    </div>
+
+                    <p className="text-sm text-gray-500 mt-6">
+                        <span className="mr-1">💡</span> ¿No recibiste el correo? Recuerda revisar tu carpeta de spam o correo no deseado.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default VerificationModal;
