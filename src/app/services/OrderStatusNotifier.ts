@@ -1,77 +1,95 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { prisma } from '@/lib/prisma';
 
 // Configuración del servidor
 const config = {
-    apiKey: process.env.RESEND_API_KEY || '',
-    fromEmail: process.env.RESEND_FROM_EMAIL || 'noreply@lymchicstore.onrender.com',
-    frontendUrl: process.env.FRONTEND_URL || 'https://lymchicstore.onrender.com',
-    businessEmail: process.env.BUSINESS_EMAIL || 'lymchicstore@gmail.com'
+  emailUser: process.env.EMAIL_USER || 'lymchicstore@gmail.com',
+  emailPass: process.env.EMAIL_PASS || '',
+  fromEmail: `"L&M CHIC Store" <${process.env.EMAIL_USER || 'lymchicstore@gmail.com'}>`,
+  frontendUrl: process.env.FRONTEND_URL || 'https://lymchicstore.vercel.app',
+  businessEmail: process.env.BUSINESS_EMAIL || 'lymchicstore@gmail.com'
 };
 
-const resend = config.apiKey ? new Resend(config.apiKey) : null;
+const transporter = config.emailPass ? nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: config.emailUser, pass: config.emailPass }
+}) : null;
+
+// Emulador de Resend con Nodemailer
+const resend = transporter ? {
+  emails: {
+    send: async (options: any) => {
+      return transporter.sendMail({
+        from: options.from || config.fromEmail,
+        to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
+        subject: options.subject,
+        html: options.html
+      });
+    }
+  }
+} : null;
 
 const statusInfo = {
-    'pending': { emoji: '⏳', message: 'Orden recibida', color: '#fef3c7', textColor: '#92400e', nextStep: 'Estamos confirmando tu pedido' },
-    'processing': { emoji: '🔄', message: 'En preparación', color: '#dbeafe', textColor: '#1e40af', nextStep: 'Tu orden está siendo preparada con cuidado' },
-    'shipped': { emoji: '🚚', message: 'En camino', color: '#dcfce7', textColor: '#166534', nextStep: 'Tu pedido ha sido enviado y está en camino' },
-    'delivered': { emoji: '✨', message: 'Entregada', color: '#f0fdf4', textColor: '#166534', nextStep: '¡Disfruta de tu compra! Gracias por confiar en nosotros' },
-    'cancelled': { emoji: '❌', message: 'Cancelada', color: '#fef2f2', textColor: '#991b1b', nextStep: 'Contacta con nosotros para más información' }
+  'pending': { emoji: '⏳', message: 'Orden recibida', color: '#fef3c7', textColor: '#92400e', nextStep: 'Estamos confirmando tu pedido' },
+  'processing': { emoji: '🔄', message: 'En preparación', color: '#dbeafe', textColor: '#1e40af', nextStep: 'Tu orden está siendo preparada con cuidado' },
+  'shipped': { emoji: '🚚', message: 'En camino', color: '#dcfce7', textColor: '#166534', nextStep: 'Tu pedido ha sido enviado y está en camino' },
+  'delivered': { emoji: '✨', message: 'Entregada', color: '#f0fdf4', textColor: '#166534', nextStep: '¡Disfruta de tu compra! Gracias por confiar en nosotros' },
+  'cancelled': { emoji: '❌', message: 'Cancelada', color: '#fef2f2', textColor: '#991b1b', nextStep: 'Contacta con nosotros para más información' }
 };
 
 const normalizeStatus = (statusName: string): keyof typeof statusInfo => {
-    const normalized = statusName.trim().toLowerCase();
-    const map: Record<string, keyof typeof statusInfo> = {
-        'pendiente': 'pending',
-        'en proceso': 'processing',
-        'enviado': 'shipped',
-        'entregado': 'delivered',
-        'cancelado': 'cancelled'
-    };
-    return map[normalized] || 'pending';
+  const normalized = statusName.trim().toLowerCase();
+  const map: Record<string, keyof typeof statusInfo> = {
+    'pendiente': 'pending',
+    'en proceso': 'processing',
+    'enviado': 'shipped',
+    'entregado': 'delivered',
+    'cancelado': 'cancelled'
+  };
+  return map[normalized] || 'pending';
 };
 
 /**
  * Módulo de servicio para enviar notificaciones de estado por correo directamente desde el backend.
  */
 export class OrderStatusNotifier {
-    /**
-     * Envía una notificación por correo electrónico cuando el estado de una orden cambia.
-     * @param orderId El ID de la orden en la base de datos
-     * @param previousStatusId El ID del estado anterior (opcional) para evitar notificar si es idéntico
-     */
-    static async notifyStatusChange(orderId: number, previousStatusId?: number) {
-        try {
-            // 1. Obtener la orden completa
-            const order = await prisma.order.findUnique({
-                where: { order_id: orderId },
-                include: {
-                    user: true,
-                    orderStatus: true,
-                }
-            });
+  /**
+   * Envía una notificación por correo electrónico cuando el estado de una orden cambia.
+   * @param orderId El ID de la orden en la base de datos
+   * @param previousStatusId El ID del estado anterior (opcional) para evitar notificar si es idéntico
+   */
+  static async notifyStatusChange(orderId: number, previousStatusId?: number) {
+    try {
+      // 1. Obtener la orden completa
+      const order = await prisma.order.findUnique({
+        where: { order_id: orderId },
+        include: {
+          user: true,
+          orderStatus: true,
+        }
+      });
 
-            // Validar existencia
-            if (!order || !order.user || !order.user.email_address) {
-                console.warn(`❌ [OrderStatusNotifier] No se encontró la orden ${orderId} o falta información de usuario.`);
-                return false;
-            }
+      // Validar existencia
+      if (!order || !order.user || !order.user.email_address) {
+        console.warn(`❌ [OrderStatusNotifier] No se encontró la orden ${orderId} o falta información de usuario.`);
+        return false;
+      }
 
-            // Evitar notificación si el estado es el mismo que el anterior
-            if (previousStatusId && order.order_status_id === previousStatusId) {
-                return false;
-            }
+      // Evitar notificación si el estado es el mismo que el anterior
+      if (previousStatusId && order.order_status_id === previousStatusId) {
+        return false;
+      }
 
-            if (!resend) {
-                console.error('❌ [OrderStatusNotifier] RESEND_API_KEY no configurada. Saltando envío.');
-                return false;
-            }
+      if (!resend) {
+        console.error('❌ [OrderStatusNotifier] RESEND_API_KEY no configurada. Saltando envío.');
+        return false;
+      }
 
-            const orderStatusName = order.orderStatus.status_name;
-            const statusCode = normalizeStatus(orderStatusName);
-            const currentStatus = statusInfo[statusCode];
+      const orderStatusName = order.orderStatus.status_name;
+      const statusCode = normalizeStatus(orderStatusName);
+      const currentStatus = statusInfo[statusCode];
 
-            const htmlContent = `
+      const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -160,18 +178,18 @@ export class OrderStatusNotifier {
         </html>
       `;
 
-            const result = await resend.emails.send({
-                from: config.fromEmail,
-                to: [order.user.email_address],
-                subject: `${currentStatus.emoji} Actualización Pedido ${order.order_number} - L&M CHIC Store`,
-                html: htmlContent,
-            });
+      const result = await resend.emails.send({
+        from: config.fromEmail,
+        to: [order.user.email_address],
+        subject: `${currentStatus.emoji} Actualización Pedido ${order.order_number} - L&M CHIC Store`,
+        html: htmlContent,
+      });
 
-            console.log(`✅ [OrderStatusNotifier] Email enviado para el pedido ${order.order_number}: `, result);
-            return true;
-        } catch (error) {
-            console.error(`❌ [OrderStatusNotifier] Error al notificar actualización de pedido ${orderId}:`, error);
-            return false;
-        }
+      console.log(`✅ [OrderStatusNotifier] Email enviado para el pedido ${order.order_number}: `, result);
+      return true;
+    } catch (error) {
+      console.error(`❌ [OrderStatusNotifier] Error al notificar actualización de pedido ${orderId}:`, error);
+      return false;
     }
+  }
 }
