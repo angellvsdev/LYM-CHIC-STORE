@@ -109,33 +109,35 @@ const VerifyEmailContent = () => {
 
 const VerifyEmail = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-bl from-white to-amaranth-pink-800">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 font-grotesk">
+    <div style={{ width: '100vw', minHeight: '100vh' }} className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-pink-50 to-purple-50">
+      <div className="w-[95%] sm:w-full max-w-lg bg-white rounded-3xl shadow-xl p-8 md:p-10 font-grotesk">
         {/* Logo y Header */}
-        <div className="text-center mb-8">
-          <div className="text-3xl font-bold text-amaranth-pink-600 mb-2">
+        <div className="text-center mb-10">
+          <div className="text-4xl font-bold text-amaranth-pink-600 mb-3 tracking-tight">
             🎀 L&M CHIC Store
           </div>
-          <p className="text-gray-600">
+          <p className="text-gray-500 font-medium">
             Verificación de Correo Electrónico
           </p>
         </div>
 
         {/* Contenido Principal con Suspense */}
-        <Suspense fallback={
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amaranth-pink-600 mx-auto"></div>
-            <p className="text-gray-600">Cargando verificación...</p>
-          </div>
-        }>
-          <VerifyEmailContent />
-        </Suspense>
+        <div className="bg-pink-50/40 rounded-2xl p-6 md:p-8 border border-pink-100 shadow-sm min-h-[250px] flex flex-col justify-center">
+          <Suspense fallback={
+            <div className="text-center space-y-5">
+              <div className="animate-spin rounded-full h-14 w-14 border-b-4 border-amaranth-pink-600 mx-auto"></div>
+              <p className="text-lg text-gray-600 font-medium animate-pulse">Cargando verificación...</p>
+            </div>
+          }>
+            <VerifyEmailContent />
+          </Suspense>
+        </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-sm text-gray-500">
+        <div className="mt-10 pt-6 border-t border-gray-100 text-center text-sm md:text-base text-gray-500 space-y-1">
           <p>📍 Villa del Rosario, Venezuela</p>
           <p>📧 lymchicstore@gmail.com</p>
-          <p>© 2024 L&M CHIC Store. Todos los derechos reservados.</p>
+          <p className="pt-2 text-xs">© 2024 L&M CHIC Store. Todos los derechos reservados.</p>
         </div>
       </div>
     </div>

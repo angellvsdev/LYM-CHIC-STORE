@@ -177,9 +177,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
-      // Generar token de verificación
-      const verificationToken = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-      
+      // Generar token encapsulando la data del usuario en base64 para evitar depender de localStorage
+      const tokenPayload = {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        phone_number: userData.phone_number,
+        age: userData.age,
+        gender: userData.gender,
+        ts: Date.now()
+      };
+
+      const verificationToken = btoa(encodeURIComponent(JSON.stringify(tokenPayload)));
+
       // Enviar correo de verificación
       const emailSent = await EmailNotificationService.sendAccountVerification({
         userEmail: userData.email,
@@ -192,18 +202,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
 
-      // Guardar datos temporales para verificación posterior
+      // Guardar datos temporales para reenvios (solo afecta la misma sesión de registro)
       const tempUserData = {
         ...userData,
         verificationToken,
         isVerified: false
       };
-      
+
       localStorage.setItem('tempUser', JSON.stringify(tempUserData));
-      
+
       // Redirigir a página de espera
       window.location.href = '/register/pending';
-      
+
       return true;
     } catch (error) {
       setError('Error en el registro. Intenta nuevamente.');
@@ -231,17 +241,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
-      const tempUserStr = localStorage.getItem('tempUser');
-      if (!tempUserStr) {
-        setError('Token de verificación inválido o expirado');
-        return false;
-      }
+      let tempUser;
 
-      const tempUser = JSON.parse(tempUserStr);
-      
-      if (tempUser.verificationToken !== token) {
-        setError('Token de verificación inválido');
-        return false;
+      // Intentar extraer la data directamente del Token Base64 (Nueva arquitectura Cross-browser a prueba de fallos)
+      try {
+        const decodedPayload = decodeURIComponent(atob(token));
+        tempUser = JSON.parse(decodedPayload);
+
+        // Comprobar que el token siga siend válido por 24 horas (opcional, solo medida extra de seguridad)
+        if (tempUser.ts && (Date.now() - tempUser.ts > 24 * 60 * 60 * 1000)) {
+          throw new Error('Token expirado');
+        }
+      } catch (e) {
+        // Fallback para usuarios que verifiquen con el token antiguo de Math.random (Retrocompatibilidad)
+        const tempUserStr = localStorage.getItem('tempUser');
+        if (!tempUserStr) {
+          setError('El enlace de verificación ha expirado o es inválido en este navegador. Reenvía el correo.');
+          return false;
+        }
+
+        const fallbackUser = JSON.parse(tempUserStr);
+        if (fallbackUser.verificationToken !== token) {
+          setError('El token utilizado ha quedado obsoleto. Pide uno nuevo.');
+          return false;
+        }
+        tempUser = fallbackUser;
       }
 
       // Enviar correo de confirmación
@@ -273,7 +297,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const userData = await response.json();
-      
+
       // Crear objeto de usuario para el contexto
       const verifiedUser: User = {
         id: userData.user_id.toString(),
@@ -288,7 +312,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Limpiar datos temporales
       localStorage.removeItem('tempUser');
-      
+
       // Mostrar éxito y redirigir al login
       alert('¡Cuenta verificada exitosamente! Ahora puedes iniciar sesión.');
       window.location.href = '/login';
