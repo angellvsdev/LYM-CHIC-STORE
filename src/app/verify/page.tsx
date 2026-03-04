@@ -9,7 +9,7 @@ const VerifyEmailContent = () => {
   const [message, setMessage] = useState('');
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { verifyEmail } = useAuth();
+  const { verifyEmail, error: authError } = useAuth();
   const hasAttempted = useRef(false);
 
   useEffect(() => {
@@ -30,17 +30,14 @@ const VerifyEmailContent = () => {
 
         if (result) {
           setStatus('success');
-          setMessage('¡Correo verificado exitosamente! Redirigiendo...');
-
-          // Redirigir después de 2 segundos
-          setTimeout(() => {
-            router.push('/login');
-          }, 2000);
+          setMessage('¡Correo verificado exitosamente! Redirigiendo al inicio de sesión...');
         } else {
+          // If result is false, the error state in useAuth is already updated, we should read from that context down below.
           setStatus('error');
-          setMessage('Token inválido o expirado. Vuelve a registrarte o intenta nuevamente.');
+          // No hardcoded message here, we'll let the UI display the 'error' coming from useAuth.
+          setMessage('');
         }
-      } catch (error) {
+      } catch (err) {
         setStatus('error');
         setMessage('Error verificando el correo. Intenta nuevamente.');
       }
@@ -84,8 +81,8 @@ const VerifyEmailContent = () => {
           <h2 className="text-2xl font-semibold text-red-600 mb-2">
             Error de Verificación
           </h2>
-          <p className="text-gray-600">
-            {message}
+          <p className="text-gray-600 font-medium pb-2">
+            {authError || message || 'El token de acceso es inválido.'}
           </p>
           <div className="mt-6 space-y-3">
             <button

@@ -182,9 +182,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         name: userData.name,
         email: userData.email,
         password: userData.password,
-        phone_number: userData.phone_number,
+        confirmPassword: userData.password, // Necesario para la validación de Zod en api/auth/register
+        phone_number: userData.phone_number || '0000000', // Valor por defecto en caso de estar ausente
         age: userData.age,
-        gender: userData.gender,
+        gender: userData.gender || 'O',
         ts: Date.now()
       };
 
@@ -295,9 +296,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           name: tempUser.name,
           email_address: tempUser.email,
           password: tempUser.password,
-          phone_number: tempUser.phone_number,
+          confirmPassword: tempUser.password, // Importante para validación en Zod!
+          phone_number: tempUser.phone_number || '0000000',
           age: tempUser.age,
-          gender: tempUser.gender,
+          gender: tempUser.gender || 'O',
         }),
       });
 
