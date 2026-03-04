@@ -1,23 +1,36 @@
-'use client';
+import nodemailer from 'nodemailer';
 
-import { Resend } from 'resend';
-
-// Configuración dinámica para producción
+// Configuración dinámica para producción (Zero Cost con Gmail)
 const config = {
-  apiKey: process.env.RESEND_API_KEY || '',
-  fromEmail: process.env.RESEND_FROM_EMAIL || 'noreply@lymchicstore.onrender.com',
-  frontendUrl: process.env.FRONTEND_URL || 'https://lymchicstore.onrender.com',
+  emailUser: process.env.EMAIL_USER || 'lymchicstore@gmail.com',
+  emailPass: process.env.EMAIL_PASS || '',
+  fromEmail: `"L&M CHIC Store" <${process.env.EMAIL_USER || 'lymchicstore@gmail.com'}>`,
+  frontendUrl: process.env.FRONTEND_URL || 'https://lymchicstore.vercel.app',
   businessEmail: process.env.BUSINESS_EMAIL || 'lymchicstore@gmail.com'
 };
 
-// Validar que la API key existe antes de inicializar
-if (!config.apiKey) {
-  console.error('❌ ERROR: RESEND_API_KEY no está configurada en las variables de entorno');
-  console.log('📋 Por favor, configura esta variable en tu archivo .env o en el dashboard de Vercel');
+if (!config.emailPass) {
+  console.error('❌ ERROR: EMAIL_PASS (App Password) de Gmail no configurado en variables de entorno');
 }
 
-// Inicializar Resend solo si la API key está disponible
-const resend = config.apiKey ? new Resend(config.apiKey) : null;
+const transporter = config.emailPass ? nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: config.emailUser, pass: config.emailPass }
+}) : null;
+
+// Emulador de Resend con Nodemailer
+const resend = transporter ? {
+  emails: {
+    send: async (options: any) => {
+      return transporter.sendMail({
+        from: options.from || config.fromEmail,
+        to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
+        subject: options.subject,
+        html: options.html
+      });
+    }
+  }
+} : null;
 
 // Interfaces para tipos de datos
 export interface EmailVerificationData {
@@ -73,7 +86,7 @@ export class EmailNotificationService {
       }
 
       const verificationUrl = `${config.frontendUrl}/verify?token=${data.verificationToken}`;
-      
+
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -357,7 +370,7 @@ export class EmailNotificationService {
       };
 
       const currentStatus = statusInfo[data.newStatus as keyof typeof statusInfo];
-      
+
       const htmlContent = `
         <!DOCTYPE html>
         <html>
