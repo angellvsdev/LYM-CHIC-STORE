@@ -1,25 +1,25 @@
 'use client';
-import { 
-    GiftIcon, 
-    InformationCircleIcon, 
-    PhoneIcon, 
+import {
+    GiftIcon,
+    InformationCircleIcon,
+    PhoneIcon,
     ChevronDownIcon,
+    ChevronUpIcon,
     ShoppingBagIcon,
-    ShoppingCartIcon, 
-    ArrowRightEndOnRectangleIcon, 
+    ShoppingCartIcon,
+    ArrowRightEndOnRectangleIcon,
     UserIcon,
     UserCircleIcon,
     Cog6ToothIcon
 } from "@heroicons/react/24/outline";
 import React, { useState, useEffect } from "react";
-import { useSwipeable } from "react-swipeable";
 import Link from "next/link";
 import { useAuth } from "../../../hooks/useAuth";
 
 const UseNavBar = () => {
     const [isVisible, setIsVisible] = useState(false);
     const { user } = useAuth();
-    
+
     useEffect(() => {
         const isMobile = window.innerWidth < 768;
         if (isVisible && isMobile) {
@@ -33,24 +33,7 @@ const UseNavBar = () => {
         };
     }, [isVisible]);
 
-    const useSwipeableNav = () => {
-        const handlers = useSwipeable({
-            onSwipedDown: () => {
-                // Handle swipe down event
-                setIsVisible(true)
-            },
-            onSwipedUp: () => {
-                // Handle swipe up event
-                setIsVisible(false)
-                
-            },
-            trackMouse: true,
-        });
-
-        return handlers;
-    }
-
-    return(
+    return (
         <>
             <nav className="flex flex-col py-5 bg-linear-60 from-amaranth-pink-200 to-amaranth-pink-300 font-grotesk relative">
                 {/* Botón de perfil de usuario - Desktop */}
@@ -71,14 +54,17 @@ const UseNavBar = () => {
                     )}
                 </div>
 
-                <div className="block text-[#510023] text-center text-[14px] md:hidden my-3 z-[60]" {...useSwipeableNav()}>
+                <div
+                    className="block text-[#510023] text-center text-[14px] md:hidden my-3 z-[60] cursor-pointer"
+                    onClick={() => setIsVisible(!isVisible)}
+                >
                     {
-                        isVisible 
-                            ? <p>Desliza hacia arriba para ocultar el menú. <ChevronDownIcon className="w-full h-[20px] text-center" /></p>
-                            : <p>Desliza hacia abajo para desplegar el menú. <ChevronDownIcon className="w-full h-[20px] text-center" /></p>
+                        isVisible
+                            ? <p>Toca para cerrar <ChevronUpIcon className="w-full h-[20px] text-center" /></p>
+                            : <p>Toca para abrir <ChevronDownIcon className="w-full h-[20px] text-center" /></p>
                     }
                 </div>
-                <div className={`w-screen ${ isVisible ? 'flex h-screen absolute top-0 z-50 font-grotesk' : ''}`}>
+                <div className={`w-screen ${isVisible ? 'flex h-screen absolute top-0 z-50 font-grotesk' : ''}`}>
                     {isVisible ? <div className={`flex flex-col items-center justify-center w-full h-screen bg-gradient-to-b from-amaranth-pink-200 to-amaranth-pink-300 px-2 animate__animated animate__slideInDown animate__faster`}>
                         {/* Botón de perfil de usuario - Mobile (primera opción, centrado y más grande) */}
                         {user ? (
