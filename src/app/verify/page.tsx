@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -10,6 +10,7 @@ const VerifyEmailContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { verifyEmail } = useAuth();
+  const hasAttempted = useRef(false);
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -19,6 +20,9 @@ const VerifyEmailContent = () => {
       setMessage('Token de verificación no proporcionado');
       return;
     }
+
+    if (hasAttempted.current) return;
+    hasAttempted.current = true;
 
     const verifyEmailToken = async () => {
       try {
@@ -30,11 +34,11 @@ const VerifyEmailContent = () => {
 
           // Redirigir después de 2 segundos
           setTimeout(() => {
-            router.push('/profile');
+            router.push('/login');
           }, 2000);
         } else {
           setStatus('error');
-          setMessage('Token inválido o expirado. Intenta nuevamente.');
+          setMessage('Token inválido o expirado. Vuelve a registrarte o intenta nuevamente.');
         }
       } catch (error) {
         setStatus('error');
