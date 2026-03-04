@@ -177,7 +177,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
-      // Generar token encapsulando la data del usuario en base64 para evitar depender de localStorage
+      // Generar token encapsulando la data del usuario de manera 100% segura para URLs
       const tokenPayload = {
         name: userData.name,
         email: userData.email,
@@ -188,7 +188,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         ts: Date.now()
       };
 
-      const verificationToken = btoa(encodeURIComponent(JSON.stringify(tokenPayload)));
+      const payloadString = unescape(encodeURIComponent(JSON.stringify(tokenPayload)));
+      const verificationToken = btoa(payloadString)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
 
       // Enviar correo de verificación
       const emailSent = await EmailNotificationService.sendAccountVerification({
@@ -243,9 +247,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       let tempUser;
 
-      // Intentar extraer la data directamente del Token Base64 (Nueva arquitectura Cross-browser a prueba de fallos)
+      // Intentar extraer la data directamente del Token codificado (Nueva arquitectura URL-Safe a prueba de fallos)
       try {
-        const decodedPayload = decodeURIComponent(atob(token));
+        // Restauramos los caracteres perdidos o codoficados mal por los correos
+        let urlSafeBase64Url = token.replace(/-/g, '+').replace(/_/g, '/');
+        // Pad with = to make it a multiple of 4
+        while (urlSafeBase64Url.length % 4) {
+          urlSafeBase64Url += '=';
+        }
+
+        const decodedPayload = decodeURIComponent(escape(atob(urlSafeBase64Url)));
         tempUser = JSON.parse(decodedPayload);
 
         // Comprobar que el token siga siend válido por 24 horas (opcional, solo medida extra de seguridad)
@@ -253,10 +264,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           throw new Error('Token expirado');
         }
       } catch (e) {
-        // Fallback para usuarios que verifiquen con el token antiguo de Math.random (Retrocompatibilidad)
+        // Fallback para usuarios antiguos
         const tempUserStr = localStorage.getItem('tempUser');
         if (!tempUserStr) {
-          setError('El enlace de verificación ha expirado o es inválido en este navegador. Reenvía el correo.');
+          setError('El enlace de verificación ha expirado o es corrupto. Vuelve a registrarte para solicitar otro.');
           return false;
         }
 
@@ -313,9 +324,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Limpiar datos temporales
       localStorage.removeItem('tempUser');
 
-      // Mostrar éxito y redirigir al login
-      alert('¡Cuenta verificada exitosamente! Ahora puedes iniciar sesión.');
-      window.location.href = '/login';
+      // Mostrar éxito y registrar al usuario automáticamente
+      await login(tempUser.email, tempUser.password);
 
       return true;
     } catch (error) {

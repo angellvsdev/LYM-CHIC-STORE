@@ -109,10 +109,13 @@ const VerifyEmailContent = () => {
 
 const VerifyEmail = () => {
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-bl from-white to-amaranth-pink-800 animate-fadeIn">
-      <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-6 md:p-10 font-grotesk relative transform transition-all animate-slideUp">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto animate-fadeIn bg-gradient-to-bl from-white to-amaranth-pink-800">
+
+      {/* Modal container */}
+      <div className="relative z-[101] w-[95%] sm:w-[90%] md:w-[80%] lg:w-[60%] max-w-2xl bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk flex flex-col justify-center animate-slideUp">
+
         {/* Logo y Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-10 mt-4 sm:mt-0">
           <div className="text-4xl font-bold text-amaranth-pink-600 mb-3 tracking-tight">
             🎀 L&M CHIC Store
           </div>

@@ -18,11 +18,13 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-bl from-white to-amaranth-pink-800 animate-fadeIn">
-            <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk relative transform transition-all animate-slideUp">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto animate-fadeIn bg-black/60 backdrop-blur-sm">
+
+            {/* Modal container */}
+            <div className="relative z-[101] w-[95%] sm:w-[90%] md:w-[80%] lg:w-[60%] max-w-2xl bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk flex flex-col justify-center animate-slideUp">
 
                 {/* Header / Logo */}
-                <div className="text-center mb-6 md:mb-8">
+                <div className="text-center mb-6 md:mb-8 mt-4 sm:mt-0">
                     <div className="text-3xl md:text-4xl font-bold text-amaranth-pink-600 mb-2 tracking-tight">
                         🎀 L&M CHIC Store
                     </div>
