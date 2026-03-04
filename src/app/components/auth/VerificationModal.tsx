@@ -18,8 +18,8 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0 }} className="z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-            <div className="w-[95%] sm:w-full max-w-lg max-h-[95vh] overflow-y-auto bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk relative transform transition-all animate-slideUp">
+        <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-bl from-white to-amaranth-pink-800 animate-fadeIn">
+            <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk relative transform transition-all animate-slideUp">
 
                 {/* Header / Logo */}
                 <div className="text-center mb-6 md:mb-8">

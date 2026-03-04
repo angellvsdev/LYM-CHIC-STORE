@@ -109,8 +109,8 @@ const VerifyEmailContent = () => {
 
 const VerifyEmail = () => {
   return (
-    <div style={{ width: '100vw', minHeight: '100vh' }} className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-pink-50 to-purple-50">
-      <div className="w-[95%] sm:w-full max-w-lg bg-white rounded-3xl shadow-xl p-8 md:p-10 font-grotesk">
+    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-bl from-white to-amaranth-pink-800 animate-fadeIn">
+      <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-6 md:p-10 font-grotesk relative transform transition-all animate-slideUp">
         {/* Logo y Header */}
         <div className="text-center mb-10">
           <div className="text-4xl font-bold text-amaranth-pink-600 mb-3 tracking-tight">
