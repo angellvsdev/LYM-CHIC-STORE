@@ -4,11 +4,12 @@ import { prisma } from '@/lib/prisma';
 // GET - Obtener un cliente específico por ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = parseInt(params.id);
-        
+        const resolvedParams = await params;
+        const userId = parseInt(resolvedParams.id);
+
         if (isNaN(userId)) {
             return NextResponse.json(
                 { success: false, message: 'Invalid customer ID' },
@@ -99,11 +100,12 @@ export async function GET(
 // PUT - Actualizar un cliente
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = parseInt(params.id);
-        
+        const resolvedParams = await params;
+        const userId = parseInt(resolvedParams.id);
+
         if (isNaN(userId)) {
             return NextResponse.json(
                 { success: false, message: 'Invalid customer ID' },
@@ -202,11 +204,12 @@ export async function PUT(
 // DELETE - Eliminar un cliente
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = parseInt(params.id);
-        
+        const resolvedParams = await params;
+        const userId = parseInt(resolvedParams.id);
+
         if (isNaN(userId)) {
             return NextResponse.json(
                 { success: false, message: 'Invalid customer ID' },
@@ -245,9 +248,9 @@ export async function DELETE(
         // Verificar si el cliente tiene órdenes
         if (existingUser._count.orders > 0) {
             return NextResponse.json(
-                { 
-                    success: false, 
-                    message: 'Cannot delete customer with existing orders. Consider deactivating instead.' 
+                {
+                    success: false,
+                    message: 'Cannot delete customer with existing orders. Consider deactivating instead.'
                 },
                 { status: 400 }
             );
