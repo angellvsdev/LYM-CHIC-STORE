@@ -7,10 +7,10 @@ import ShoppingBagIcon from "@heroicons/react/24/outline/ShoppingBagIcon";
 
 const Footer = () => {
  return (
-    <footer className="bg-gradient-to-bl from-white to-amaranth-pink-800 text-davys-gray-100 py-4 flex flex-col md:flex-row items-center md:justify-around px-2.5">
+    <footer className="font-grotesk bg-gradient-to-bl from-white to-amaranth-pink-800 text-davys-gray-100 py-4 flex flex-col md:flex-row items-center md:justify-around px-2.5">
         <div className="flex flex-col items-center justify-center self-start mx-auto md:mx-0">
-            <h1 className="text-2xl md:text-4xl font-black">©L&M CHIC <p className="text-sm">Todos los derechos reservados.</p></h1>
-            <p className="text-sm mx-0">Hecho con amor por <a href="https://www.linkedin.com/in/angellvsdev/" target="_blank" rel="noopener noreferrer" className="hover:text-amaranth-pink-500 transition-all duration-300">Angel Vera</a></p>
+            <h1 className="text-2xl md:text-4xl font-black mt-8">©L&M CHIC <p className="text-sm">Todos los derechos reservados.</p></h1>
+            <p className="text-sm mx-0">Código limpio e ingeniería de calidad, cortesía de <a href="https://www.linkedin.com/in/angellvsdev/" target="_blank" rel="noopener noreferrer" className="italic font-extrabold hover:text-amaranth-pink-500 transition-all duration-300">Angel Vera</a></p>
         </div>
         <div className="flex flex-col justify-center self-start my-2">
             <h2 className="text-xl font-black md:text-2xl">Navegación</h2>

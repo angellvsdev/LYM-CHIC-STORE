@@ -14,10 +14,12 @@ const FeaturedProducts = () => {
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
     const [currentSlide, setCurrentSlide] = useState(0);
 
-    const { data: categoriesData, isLoading: isLoadingCategories } = useSWR('/api/categories', fetcher, { revalidateOnFocus: false });
+    const { data: categoriesData, isLoading: isLoadingCategories } = useSWR('/api/categories?featured=true', fetcher, { revalidateOnFocus: false });
     const categories: Category[] = React.useMemo(() => categoriesData?.success ? categoriesData.data.data : [], [categoriesData]);
 
-    const productUrl = selectedCategory ? `/api/products?category_id=${selectedCategory}&page=1&limit=10&sort=name&order=asc` : null;
+    const productUrl = selectedCategory
+        ? `/api/products?category_id=${selectedCategory}&featured=true&page=1&limit=10&sort=name&order=asc`
+        : `/api/products?featured=true&page=1&limit=10&sort=name&order=asc`;
     const { data: productsData, isLoading: isLoadingProducts } = useSWR(productUrl, fetcher, { keepPreviousData: true });
     const products: Product[] = React.useMemo(() => productsData?.data || [], [productsData]);
 
@@ -33,12 +35,6 @@ const FeaturedProducts = () => {
 
     }, [products.length, isAnyModalOpen]);
 
-    // Set selectedCategory to the first category when categories are loaded
-    useEffect(() => {
-        if (categories.length > 0 && !selectedCategory) {
-            setSelectedCategory(categories[0].id);
-        }
-    }, [categories, selectedCategory]);
     return (
         <section className="w-full min-h-screen bg-gradient-to-bl from-white to-amaranth-pink-800 py-12 font-grotesk">
             <h2 className="text-4xl font-bold text-center mb-12 text-gray-950">¡Lo mejor de nuestros productos!</h2>
@@ -50,7 +46,10 @@ const FeaturedProducts = () => {
                         key={category.id}
                         className={`relative cursor-pointer rounded-lg overflow-hidden shadow-lg transition-all duration-300 ${selectedCategory === category.id ? 'ring-2 ring-white' : ''
                             }`}
-                        onClick={() => setSelectedCategory(category.id)}
+                        onClick={() => {
+                            setSelectedCategory(prev => prev === category.id ? undefined : category.id);
+                            setCurrentSlide(0); // Reset carrousel en cada click
+                        }}
                     >
                         <div className="relative h-48 w-full">
                             <Image

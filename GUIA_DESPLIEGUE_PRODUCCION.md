@@ -115,9 +115,9 @@ Para poder enviar notificaciones ilimitadas de pedidos, verificación de cuentas
 
 ## 5. Lista Final de Verificación ✅
 
-- [ ] La base de datos de producción en Supabase está inicializada con `lymchicstore@gmail.com` (contraseña: `Lym_administration_321`).
-- [ ] El proyecto hizo build en Vercel sin errores bajo tu subdominio `.vercel.app`.
-- [ ] Las variables de Cloudinary, Supabase y tu frontend URL están configuradas correctamente en Vercel.
-- [ ] Eres consciente de las limitaciones de enviar correos con Resend sin dominio propio, y sabes que existe la alternativa de Nodemailer por SMTP si deseas enviar correos globales "Zero Cost".
+- [✅] La base de datos de producción en Supabase está inicializada con `lymchicstore@gmail.com` (contraseña: `Lym_administration_321`).
+- [✅] El proyecto hizo build en Vercel sin errores bajo tu subdominio `.vercel.app`.
+- [✅] Las variables de Cloudinary, Supabase y tu frontend URL están configuradas correctamente en Vercel.
+- [✅] Eres consciente de las limitaciones de enviar correos con Resend sin dominio propio, y sabes que existe la alternativa de Nodemailer por SMTP si deseas enviar correos globales "Zero Cost".
 
 **¡Felicidades! L&M CHIC Store está ahora completamente en internet sin generar gastos de infraestructura.**

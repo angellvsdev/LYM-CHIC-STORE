@@ -23,9 +23,9 @@ export async function GET(
 
         if (!product) {
             return NextResponse.json(
-                { 
-                    success: false, 
-                    error: 'Product not found' 
+                {
+                    success: false,
+                    error: 'Product not found'
                 },
                 { status: 404 }
             );
@@ -44,7 +44,7 @@ export async function GET(
             stock: product.stock || 0,
             status: 'active' as const,
             image: product.image || '',
-            images: [product.image || ''],
+            images: Array.isArray(product.images) && product.images.length > 0 ? product.images : (product.image ? [product.image] : []),
             createdAt: new Date().toISOString(), // Default since not in schema
             updatedAt: new Date().toISOString(), // Default since not in schema
             size: product.size,
@@ -60,9 +60,9 @@ export async function GET(
     } catch (error) {
         console.error('Error fetching product:', error);
         return NextResponse.json(
-            { 
-                success: false, 
-                error: 'Internal server error' 
+            {
+                success: false,
+                error: 'Internal server error'
             },
             { status: 500 }
         );
@@ -76,10 +76,10 @@ export async function PUT(
     try {
         const resolvedParams = await params;
         const body = await request.json();
-        const { 
-            name, 
-            description, 
-            categoryId, 
+        const {
+            name,
+            description,
+            categoryId,
             price,
             size,
             color,
@@ -92,9 +92,9 @@ export async function PUT(
         // Basic validations
         if (!name || !description || !categoryId || !price) {
             return NextResponse.json(
-                { 
-                    success: false, 
-                    error: 'All required fields must be present' 
+                {
+                    success: false,
+                    error: 'All required fields must be present'
                 },
                 { status: 400 }
             );
@@ -136,9 +136,9 @@ export async function PUT(
     } catch (error) {
         console.error('Error updating product:', error);
         return NextResponse.json(
-            { 
-                success: false, 
-                error: 'Internal server error' 
+            {
+                success: false,
+                error: 'Internal server error'
             },
             { status: 500 }
         );
@@ -151,7 +151,7 @@ export async function DELETE(
 ) {
     try {
         const resolvedParams = await params;
-        
+
         // Check if product exists
         const existingProduct = await prisma.product.findUnique({
             where: {
@@ -161,9 +161,9 @@ export async function DELETE(
 
         if (!existingProduct) {
             return NextResponse.json(
-                { 
-                    success: false, 
-                    error: 'Product not found' 
+                {
+                    success: false,
+                    error: 'Product not found'
                 },
                 { status: 404 }
             );
@@ -201,9 +201,9 @@ export async function DELETE(
     } catch (error) {
         console.error('Error deleting product:', error);
         return NextResponse.json(
-            { 
-                success: false, 
-                error: 'Internal server error' 
+            {
+                success: false,
+                error: 'Internal server error'
             },
             { status: 500 }
         );
