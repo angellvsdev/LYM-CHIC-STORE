@@ -57,8 +57,8 @@ const VerifyEmailContent = () => {
 
       {status === 'success' && (
         <div className="space-y-4">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-full h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-full h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L4.5 17.5l7.5-7.5L19 8l-7.5 7.5z" />
             </svg>
           </div>
@@ -87,15 +87,9 @@ const VerifyEmailContent = () => {
           <div className="mt-6 space-y-3">
             <button
               onClick={() => router.push('/login')}
-              className="w-full bg-amaranth-pink-600 text-white py-3 px-4 rounded-lg hover:bg-amaranth-pink-700 transition-colors"
+              className="cursor-pointer w-full bg-amaranth-pink-600 text-white py-3 px-4 rounded-lg hover:bg-amaranth-pink-700 transition-colors"
             >
               Volver al Inicio de Sesión
-            </button>
-            <button
-              onClick={() => window.location.href = `mailto:lymchicstore@gmail.com?subject=Problema%20verificaci%C3%B3n%20correo&body=Token:%20${searchParams.get('token')}`}
-              className="w-full bg-gray-600 text-white py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              Contactar Soporte
             </button>
           </div>
         </div>
@@ -106,10 +100,10 @@ const VerifyEmailContent = () => {
 
 const VerifyEmail = () => {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto animate-fadeIn bg-gradient-to-bl from-white to-amaranth-pink-800">
+    <div className="h-screen w-full relative flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-bl from-white to-amaranth-pink-800 animate-fadeIn">
 
       {/* Modal container */}
-      <div className="relative z-[101] w-[95%] sm:w-[90%] md:w-[80%] lg:w-[60%] max-w-2xl bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk flex flex-col justify-center animate-slideUp">
+      <div className="relative z-10 w-[90%] bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk flex flex-col justify-center animate-slideUp">
 
         {/* Logo y Header */}
         <div className="text-center mb-10 mt-4 sm:mt-0">
@@ -137,7 +131,7 @@ const VerifyEmail = () => {
         <div className="mt-10 pt-6 border-t border-gray-100 text-center text-sm md:text-base text-gray-500 space-y-1">
           <p>📍 Villa del Rosario, Venezuela</p>
           <p>📧 lymchicstore@gmail.com</p>
-          <p className="pt-2 text-xs">© 2024 L&M CHIC Store. Todos los derechos reservados.</p>
+          <p className="pt-2 text-xs">© 2026 L&M CHIC Store. Todos los derechos reservados.</p>
         </div>
       </div>
     </div>

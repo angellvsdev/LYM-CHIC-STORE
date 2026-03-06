@@ -18,20 +18,20 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto animate-fadeIn bg-black/60 backdrop-blur-sm">
+        <div className="w-full relative flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-bl from-white to-amaranth-pink-800 animate-fadeIn">
 
             {/* Modal container */}
-            <div className="relative z-[101] w-[95%] sm:w-[90%] md:w-[80%] lg:w-[60%] max-w-2xl bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk flex flex-col justify-center animate-slideUp">
+            <div className="relative z-10 w-[90%] bg-white rounded-3xl shadow-2xl p-6 md:p-10 font-grotesk flex flex-col justify-center animate-slideUp">
 
                 {/* Header / Logo */}
-                <div className="text-center mb-6 md:mb-8 mt-4 sm:mt-0">
+                <div className="text-center mb-6 md:mb-8 mt-4">
                     <div className="text-3xl md:text-4xl font-bold text-amaranth-pink-600 mb-2 tracking-tight">
                         🎀 L&M CHIC Store
                     </div>
                 </div>
 
                 {/* Content Box */}
-                <div className="text-center bg-pink-50/50 rounded-2xl p-5 md:p-8 border border-pink-100 shadow-inner">
+                <div className="text-center bg-pink-50/50 rounded-2xl p-5 md:p-8 border border-pink-100 shadow-inner w-full">
                     <div className="text-5xl md:text-6xl mb-4 md:mb-6 flex justify-center">
                         {/* Animación local simulando el envío del correo */}
                         <div className="relative">
