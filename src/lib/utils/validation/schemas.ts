@@ -111,6 +111,7 @@ export const ProductsQuerySchema = z.object({
   order: z.enum(['asc', 'desc']).default('asc'),
   min_price: z.coerce.number().min(0).default(0),
   max_price: z.coerce.number().min(0).default(1000),
+  featured: z.enum(['true', 'false']).transform((val) => val === 'true').optional(),
 });
 
 // Query Parameters for Categories API

@@ -16,18 +16,18 @@ export async function GET(request: NextRequest) {
 
         // Build where clause for filtering
         const where: any = {};
-        
+
         if (category) {
             where.categoryId = category;
         }
-        
+
         if (search) {
             where.OR = [
                 { name: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } }
             ];
         }
-        
+
         if (priceFrom || priceTo) {
             where.price = {};
             if (priceFrom) {
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
             stock: product.stock || 0,
             status: 'active' as const,
             image: product.image || '',
-            images: [product.image || ''],
+            images: Array.isArray(product.images) && product.images.length > 0 ? product.images : (product.image ? [product.image] : []),
             createdAt: new Date().toISOString(), // Default since not in schema
             updatedAt: new Date().toISOString(), // Default since not in schema
             size: product.size,
@@ -98,9 +98,9 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('Error fetching products:', error);
         return NextResponse.json(
-            { 
-                success: false, 
-                error: 'Internal server error' 
+            {
+                success: false,
+                error: 'Internal server error'
             },
             { status: 500 }
         );
@@ -110,14 +110,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { 
-            name, 
-            description, 
-            categoryId, 
+        const {
+            name,
+            description,
+            categoryId,
             price,
             size,
             color,
             image,
+            images,
             featured,
             stock
         } = body;
@@ -130,9 +131,9 @@ export async function POST(request: NextRequest) {
 
         if (!hasName || !hasDescription || !hasCategoryId || !hasPrice) {
             return NextResponse.json(
-                { 
-                    success: false, 
-                    error: 'All required fields must be present' 
+                {
+                    success: false,
+                    error: 'All required fields must be present'
                 },
                 { status: 400 }
             );
@@ -174,6 +175,7 @@ export async function POST(request: NextRequest) {
                 size: size || null,
                 color: color || null,
                 image: image || '',
+                images: images || [],
                 featured: Boolean(featured),
                 stock: stock || 0
             },
@@ -196,9 +198,9 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Error creating product:', error);
         return NextResponse.json(
-            { 
-                success: false, 
-                error: 'Internal server error' 
+            {
+                success: false,
+                error: 'Internal server error'
             },
             { status: 500 }
         );

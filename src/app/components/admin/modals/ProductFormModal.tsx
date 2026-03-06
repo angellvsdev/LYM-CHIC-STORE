@@ -54,31 +54,39 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     React.useEffect(() => {
         if (isOpen) {
             setFormData(initialData || {});
-            // Handle existing images from product
-            if (initialData?.images && Array.isArray(initialData.images) && initialData.images.length > 0) {
-                // Convert string URLs to UploadedImage objects
-                const validImages = initialData.images.filter(img => img && img.trim() !== '');
-                setUploadedImages(validImages.map(url => ({
-                    url,
+
+            // Handle existing images from product cleanly
+            const imagesToLoad: UploadedImage[] = [];
+
+            if (initialData?.images && Array.isArray(initialData.images)) {
+                initialData.images.forEach(url => {
+                    if (url && typeof url === 'string' && url.trim() !== '') {
+                        imagesToLoad.push({
+                            url,
+                            publicId: '',
+                            width: 1200, // Dummy fallback for existing previews
+                            height: 1200,
+                            format: 'jpg',
+                            size: 1024
+                        });
+                    }
+                });
+            } else if (initialData?.image && typeof initialData.image === 'string' && initialData.image.trim() !== '') {
+                imagesToLoad.push({
+                    url: initialData.image,
                     publicId: '',
-                    width: 0,
-                    height: 0,
-                    format: '',
-                    size: 0
-                })));
-            } else if (initialData?.image && initialData.image.trim() !== '') {
-                // Convert single image to array for backward compatibility
-                setUploadedImages([{ 
-                    url: initialData.image, 
-                    publicId: '', 
-                    width: 0, 
-                    height: 0, 
-                    format: '', 
-                    size: 0 
-                }]);
-            } else {
-                setUploadedImages([]);
+                    width: 1200,
+                    height: 1200,
+                    format: 'jpg',
+                    size: 1024
+                });
             }
+
+            setUploadedImages(imagesToLoad);
+        } else {
+            // Clean up when modal closes
+            setUploadedImages([]);
+            setFormData({});
         }
     }, [isOpen, JSON.stringify(initialData)]);
 
@@ -87,16 +95,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     };
 
     const handleImagesChange = (images: UploadedImage[]) => {
-        console.log('handleImagesChange called with:', images);
         setUploadedImages(images);
-        // Update form data with all images
-        handleInputChange('images', images);
-        // Also update main image field for backward compatibility
-        if (images.length > 0) {
-            handleInputChange('image', images[0].url);
-        } else {
-            handleInputChange('image', '');
-        }
+        // Correctly update form data with ALL images strings arrays immediately
+        setFormData(prev => ({
+            ...prev,
+            images: images.map(img => img.url),
+            // Set the fallback image for legacy structure
+            image: images.length > 0 ? images[0].url : ''
+        }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -113,7 +119,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
     const renderField = (field: FormField) => {
         const value = formData[field.name] || '';
-        
+
         switch (field.type) {
             case 'textarea':
                 return (
@@ -170,7 +176,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         type={field.type}
                         id={field.name}
                         name={field.name}
-                        value={value || '0'}
+                        value={value || ''}
                         onChange={(e) => handleInputChange(field.name, e.target.value)}
                         required={field.required}
                         step={field.type === 'number' ? '0' : value}

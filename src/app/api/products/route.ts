@@ -6,13 +6,13 @@ import { ProductsQuerySchema } from "@/lib/utils/validation/schemas";
 export async function GET(req: NextRequest) {
   try {
     console.log("🔍 Fetching products...");
-    
+
     // Validar parámetros de consulta con Zod
     const searchParams = req.nextUrl.searchParams;
     const queryParams = Object.fromEntries(searchParams.entries());
-    
+
     const validatedParams = ProductsQuerySchema.parse(queryParams);
-    
+
     const {
       category_id,
       search,
@@ -21,9 +21,10 @@ export async function GET(req: NextRequest) {
       sort,
       order,
       min_price,
-      max_price
+      max_price,
+      featured
     } = validatedParams;
-    
+
     const skip = (page - 1) * limit;
 
     // Construir condiciones de búsqueda
@@ -32,6 +33,11 @@ export async function GET(req: NextRequest) {
     // Filtro por categoría
     if (category_id) {
       where.categoryId = category_id;
+    }
+
+    // Filtro por destacado
+    if (featured !== undefined) {
+      where.featured = featured;
     }
 
     // Filtro por precio
@@ -90,18 +96,18 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("❌ Error fetching products:", error);
-    
+
     // Manejar errores de validación de Zod
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json(
-        { 
-          message: "Invalid query parameters", 
-          error: error.message 
+        {
+          message: "Invalid query parameters",
+          error: error.message
         },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       { message: "Internal Server Error", error: error instanceof Error ? error.message : String(error) },
       { status: 500 }

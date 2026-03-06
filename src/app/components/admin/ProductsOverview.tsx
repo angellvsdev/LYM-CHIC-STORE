@@ -126,7 +126,7 @@ const ProductsOverview: React.FC = () => {
                 featured: Boolean(formData.featured),
                 stock: parseInt(formData.stock) || 0
             };
-            
+
             await apiClient.post('/api/admin/products', body);
             setShowCreateModal(false);
             await fetchProducts();
@@ -140,7 +140,7 @@ const ProductsOverview: React.FC = () => {
 
     const handleEditProduct = async (formData: Record<string, any>) => {
         if (!selectedProduct) return;
-        
+
         try {
             setIsSubmitting(true);
             const body = {
@@ -155,7 +155,7 @@ const ProductsOverview: React.FC = () => {
                 featured: Boolean(formData.featured),
                 stock: parseInt(formData.stock) || 0
             };
-            
+
             await apiClient.put(`/api/admin/products/${selectedProduct.id}`, body);
             setShowEditModal(false);
             await fetchProducts();
@@ -169,7 +169,7 @@ const ProductsOverview: React.FC = () => {
 
     const handleDeleteProduct = async () => {
         if (!selectedProduct) return;
-        
+
         try {
             setIsSubmitting(true);
             await apiClient.delete(`/api/admin/products/${selectedProduct.id}`);
@@ -230,8 +230,8 @@ const ProductsOverview: React.FC = () => {
                                 </svg>
                             </div>
                         </div>
-                        <button 
-                            className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amaranth-pink-400 to-amaranth-pink-500 hover:from-amaranth-pink-500 hover:to-amaranth-pink-600 text-white px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-medium" 
+                        <button
+                            className="flex items-center justify-center space-x-2 bg-gradient-to-r from-amaranth-pink-400 to-amaranth-pink-500 hover:from-amaranth-pink-500 hover:to-amaranth-pink-600 text-white px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-200 shadow-md hover:shadow-lg font-medium"
                             onClick={() => setShowCreateModal(true)}
                         >
                             <PlusIcon className="w-4 h-4" />
@@ -240,7 +240,7 @@ const ProductsOverview: React.FC = () => {
                     </div>
                 </div>
             </div>
-            
+
             {/* Loading state */}
             {loading && (
                 <div className="flex flex-col justify-center items-center py-16 sm:py-20">
@@ -426,16 +426,39 @@ const ProductsOverview: React.FC = () => {
                 fields={[
                     { name: "name", label: "Nombre del Producto", type: "text", required: true },
                     { name: "description", label: "Descripción", type: "textarea", required: true },
-                    { 
-                        name: "categoryId", 
-                        label: "Categoría", 
-                        type: "select", 
+                    {
+                        name: "categoryId",
+                        label: "Categoría",
+                        type: "select",
                         required: true,
                         options: categories.map(cat => ({ value: cat.id, label: cat.name }))
                     },
                     { name: "price", label: "Precio ($)", type: "number", required: true },
                     { name: "stock", label: "Stock", type: "number", required: true },
-                    { name: "size", label: "Tamaño", type: "text" },
+                    {
+                        name: "size",
+                        label: "Tamaño",
+                        type: "select",
+                        options: [
+                            { value: "N/A", label: "No Aplica (N/A)" },
+                            { value: "XS", label: "Ropa: XS" },
+                            { value: "S", label: "Ropa: S" },
+                            { value: "M", label: "Ropa: M" },
+                            { value: "L", label: "Ropa: L" },
+                            { value: "XL", label: "Ropa: XL" },
+                            { value: "XXL", label: "Ropa: XXL" },
+                            { value: "35", label: "Calzado: 35" },
+                            { value: "36", label: "Calzado: 36" },
+                            { value: "37", label: "Calzado: 37" },
+                            { value: "38", label: "Calzado: 38" },
+                            { value: "39", label: "Calzado: 39" },
+                            { value: "40", label: "Calzado: 40" },
+                            { value: "41", label: "Calzado: 41" },
+                            { value: "42", label: "Calzado: 42" },
+                            { value: "43", label: "Calzado: 43" },
+                            { value: "44", label: "Calzado: 44" }
+                        ]
+                    },
                     { name: "color", label: "Color", type: "text" },
                     { name: "featured", label: "Producto Destacado", type: "checkbox" }
                 ]}
@@ -458,23 +481,46 @@ const ProductsOverview: React.FC = () => {
                     size: selectedProduct.size || '',
                     color: selectedProduct.color || '',
                     image: selectedProduct.image,
-                    images: selectedProduct.images || [],
+                    images: getProductImages(selectedProduct),
                     featured: selectedProduct.featured,
                     stock: selectedProduct.stock
                 } : undefined}
                 fields={[
                     { name: "name", label: "Nombre del Producto", type: "text", required: true },
                     { name: "description", label: "Descripción", type: "textarea", required: true },
-                    { 
-                        name: "categoryId", 
-                        label: "Categoría", 
-                        type: "select", 
+                    {
+                        name: "categoryId",
+                        label: "Categoría",
+                        type: "select",
                         required: true,
                         options: categories.map(cat => ({ value: cat.id, label: cat.name }))
                     },
                     { name: "price", label: "Precio ($)", type: "number", required: true },
                     { name: "stock", label: "Stock", type: "number", required: true },
-                    { name: "size", label: "Tamaño", type: "text" },
+                    {
+                        name: "size",
+                        label: "Tamaño",
+                        type: "select",
+                        options: [
+                            { value: "N/A", label: "No Aplica (N/A)" },
+                            { value: "XS", label: "Ropa: XS" },
+                            { value: "S", label: "Ropa: S" },
+                            { value: "M", label: "Ropa: M" },
+                            { value: "L", label: "Ropa: L" },
+                            { value: "XL", label: "Ropa: XL" },
+                            { value: "XXL", label: "Ropa: XXL" },
+                            { value: "35", label: "Calzado: 35" },
+                            { value: "36", label: "Calzado: 36" },
+                            { value: "37", label: "Calzado: 37" },
+                            { value: "38", label: "Calzado: 38" },
+                            { value: "39", label: "Calzado: 39" },
+                            { value: "40", label: "Calzado: 40" },
+                            { value: "41", label: "Calzado: 41" },
+                            { value: "42", label: "Calzado: 42" },
+                            { value: "43", label: "Calzado: 43" },
+                            { value: "44", label: "Calzado: 44" }
+                        ]
+                    },
                     { name: "color", label: "Color", type: "text" },
                     { name: "featured", label: "Producto Destacado", type: "checkbox" }
                 ]}

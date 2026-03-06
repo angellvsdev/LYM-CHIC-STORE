@@ -57,14 +57,14 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onClose }) => {
       setShowNotification(true);
       return;
     }
-    
+
     if (user.role === 'admin') {
       setNotificationMessage('Los administradores no pueden agregar productos al carrito');
       setNotificationType('error');
       setShowNotification(true);
       return;
     }
-    
+
     addToCart(product);
     setNotificationMessage('¡Producto agregado al carrito!');
     setNotificationType('success');
@@ -94,16 +94,16 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onClose }) => {
         <div className="flex flex-col gap-4 w-full lg:w-1/2">
           <div className="relative w-full h-64 md:h-98 rounded-lg overflow-hidden bg-white flex items-center justify-center">
             {selectedImage ? (
-              <Image 
-                src={selectedImage} 
-                alt={product.name} 
-                fill 
-                className="object-cover" 
+              <Image
+                src={selectedImage}
+                alt={product.name}
+                fill
+                className="object-cover"
                 priority
               />
             ) : (
               <p className="text-center text-davys-gray-200 text-md flex items-center">
-                <ServerIcon className="h-6 inline mx-3"/> 
+                <ServerIcon className="h-6 inline mx-3" />
                 No hay imagenes disponibles o el servidor respondió incorrectamente.
               </p>
             )}
@@ -115,11 +115,10 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onClose }) => {
                 <button
                   key={index}
                   onClick={() => handleImageSelect(imageUrl)}
-                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                    selectedImage === imageUrl
+                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${selectedImage === imageUrl
                       ? 'border-pink-500 scale-110'
                       : 'border-gray-300 hover:border-gray-400'
-                  }`}
+                    }`}
                   title={`Imagen ${index + 1}`}
                 >
                   <Image
@@ -138,6 +137,14 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onClose }) => {
         <div className="flex flex-col w-full lg:w-1/2 gap-4">
           <span className="text-pink-500 font-bold text-xs uppercase tracking-widest">Nuevo</span>
           <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-davys-gray-100 mb-2">{product.name}</h2>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {product.size && product.size !== 'N/A' && (
+              <span className="px-2 py-1 text-sm rounded bg-lavender-blush-400 text-white">{product.size}</span>
+            )}
+            {product.color && (
+              <span className="px-2 py-1 text-sm rounded bg-lavender-blush-300 text-white">{product.color}</span>
+            )}
+          </div>
           <span className="text-2xl md:text-3xl font-extrabold text-davys-gray-200 mb-2">${product.price}</span>
           {/* Descripción */}
           <div className="mb-4">
@@ -153,7 +160,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onClose }) => {
           </div>
           {/* Botón de acción */}
           {user?.role === 'admin' ? (
-            <button 
+            <button
               onClick={handleEditProduct}
               className="mt-1 px-4 md:px-6 py-3 rounded-lg transition-colors font-bold text-base md:text-lg shadow-lg flex items-center justify-center cursor-pointer bg-blue-600 text-white hover:bg-blue-700"
             >
@@ -162,7 +169,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onClose }) => {
             </button>
           ) : (
             <>
-              <ProductWhatsAppButton 
+              <ProductWhatsAppButton
                 product={{
                   id: product.id,
                   name: product.name,
@@ -176,16 +183,15 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product, onClose }) => {
                   phone: user.phone_number || undefined
                 } : undefined}
               />
-              <button 
+              <button
                 onClick={handleAddToCart}
                 disabled={productInCart}
-                className={`mt-1 px-4 md:px-6 py-3 rounded-lg transition-colors font-bold text-base md:text-lg shadow-lg flex items-center justify-center cursor-pointer ${
-                  productInCart 
-                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                className={`mt-1 px-4 md:px-6 py-3 rounded-lg transition-colors font-bold text-base md:text-lg shadow-lg flex items-center justify-center cursor-pointer ${productInCart
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                     : user
                       ? 'bg-pink-600 text-white hover:bg-pink-700'
                       : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
-                }`}
+                  }`}
               >
                 <ShoppingCartIcon className="h-6 inline mx-3" />
                 {productInCart ? 'Ya está en el carrito' : user ? 'Agregar al Carrito' : 'Registrate ó Inicia sesión para agregar'}

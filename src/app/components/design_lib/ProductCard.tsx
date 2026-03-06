@@ -71,7 +71,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product }) => {
                 <div className="flex flex-col flex-grow p-4 space-y-3">
                     <h3 className="text-lg font-semibold text-white line-clamp-2">{product.name}</h3>
                     <div className="flex flex-wrap gap-2">
-                        {product.size && (
+                        {product.size && product.size !== 'N/A' && (
                             <span className="px-2 py-1 text-sm rounded bg-lavender-blush-400 text-white">{product.size}</span>
                         )}
                         {product.color && (
