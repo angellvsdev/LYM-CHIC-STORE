@@ -1,4 +1,4 @@
-# LYM ChicStore - E-Commerce Platform
+# L&M CHIC STORE - E-Commerce Platform
 
 A high-performance, full-stack e-commerce web application meticulously engineered using Next.js, React, and PostgreSQL. This project focuses on scalability, clean architecture, deep performance optimization, and a seamless user and admin experience.
 
